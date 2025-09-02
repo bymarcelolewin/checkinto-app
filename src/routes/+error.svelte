@@ -18,7 +18,7 @@
 		{#if status === 404}
 			<h1 class="title">Event Not Found</h1>
 			<p class="message">
-				This event doesn't exist or is no longer active. 
+				This event can't be found or is no longer active. 
 				Please check your URL or contact the event organizer.
 			</p>
 		{:else}

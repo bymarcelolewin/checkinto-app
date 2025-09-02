@@ -70,7 +70,7 @@
 	{:else}
 		<div class="error-state">
 			<h1>Event Not Found</h1>
-			<p>This event could not be found or is no longer active.</p>
+			<p>This event can't be found or is no longer active.</p>
 		</div>
 	{/if}
 </div>

@@ -1,6 +1,6 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/checkinto-io/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
 A mobile-first web application that enables seamless self-service check-in for in-person community event attendees with real-time raffle functionality and full multi-tenant support.
