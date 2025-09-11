@@ -185,13 +185,13 @@ Comprehensive migration of CheckInto project from `icodewith-ai` organization to
 | F081 | Documentation Updates | Update all repository references and contact information | Medium | 🟢 Completed |
 | F082 | Deployment Verification | Ensure all services continue working with new configuration | High | 🟢 Completed |
 
-## v1.3.3-add-event-flag-for-checked-in-page - 🔴 Not Started
+## v1.3.3-add-event-flag-for-checked-in-page - 🟢 Completed
 Add event-level control for displaying detailed information on the confirmation page to provide organizers flexibility in what attendees see after checking in.
 
 | ID  | Feature                 | Description                              | Priority | Status |
 |-----|-------------------------|------------------------------------------|----------|--------|
-| F083 | Database Schema Enhancement | Add show_event_details boolean field to event table with default true | High | 🔴 Not Started |
-| F084 | Database Migration Script | Create migration to add field and set all existing events to true | High | 🔴 Not Started |
-| F085 | Conditional UI Rendering | Modify confirmation page to conditionally show/hide event details box | High | 🔴 Not Started |
-| F086 | Data Fetching Optimization | Skip event details queries when show_event_details is false | Medium | 🔴 Not Started |
-| F087 | TypeScript Interface Updates | Update Event interface to include show_event_details field | Medium | 🔴 Not Started |
+| F083 | Database Schema Enhancement | Add show_event_details boolean field to event table with default true | High | 🟢 Completed |
+| F084 | Database Migration Script | Create migration to add field and set all existing events to true | High | 🟢 Completed |
+| F085 | Conditional UI Rendering | Modify confirmation page to conditionally show/hide event details box | High | 🟢 Completed |
+| F086 | Data Fetching Optimization | Skip event details queries when show_event_details is false | Medium | 🟢 Completed |
+| F087 | TypeScript Interface Updates | Update Event interface to include show_event_details field | Medium | 🟢 Completed |

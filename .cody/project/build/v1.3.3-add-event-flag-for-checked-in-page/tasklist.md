@@ -52,4 +52,4 @@ This document outlines all the tasks to work on to delivery this particular vers
 |-----|------------------|-----------------------------------------|-------------|----------|--------|
 | T015 | Update Schema Documentation | Update latest-schema.sql to reflect new field | T014 | 🟢 Completed | AGENT |
 | T016 | Code Review & Cleanup | Review all code changes and clean up any temporary code | T015 | 🟢 Completed | AGENT |
-| T017 | Git Commit | Commit all changes to version control | T016 | 🔴 Not Started | USER |
+| T017 | Git Commit | Commit all changes to version control | T016 | 🟢 Completed | USER |
