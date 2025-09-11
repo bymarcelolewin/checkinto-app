@@ -51,6 +51,7 @@ export interface Event {
 	workshop_lead_id: string;
 	community_host_id: string;
 	active: boolean;
+	show_event_details: boolean;
 	created_at: string;
 	updated_at: string;
 	// Related data (populated via JOIN queries)
@@ -239,7 +240,8 @@ export function isEvent(obj: unknown): obj is Event {
 		typeof (obj as Event).presenter_id === 'string' &&
 		typeof (obj as Event).community_id === 'string' &&
 		typeof (obj as Event).venue_id === 'string' &&
-		typeof (obj as Event).active === 'boolean'
+		typeof (obj as Event).active === 'boolean' &&
+		typeof (obj as Event).show_event_details === 'boolean'
 	);
 }
 

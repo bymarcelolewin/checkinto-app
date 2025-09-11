@@ -32,6 +32,7 @@ CREATE TABLE public.event (
   title text NOT NULL,
   welcome_message text NOT NULL,
   active boolean NOT NULL DEFAULT true,
+  show_event_details boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   about_presentation text,

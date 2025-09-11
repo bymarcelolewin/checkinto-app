@@ -167,172 +167,174 @@
 			</header>
 
 			<main class="confirmation-main">
-				<div class="event-info-grid">
-					<!-- Event -->
-					<div class="info-item">
-						<div class="info-icon">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-								<line x1="16" y1="2" x2="16" y2="6"/>
-								<line x1="8" y1="2" x2="8" y2="6"/>
-								<line x1="3" y1="10" x2="21" y2="10"/>
-							</svg>
+				{#if event.show_event_details}
+					<div class="event-info-grid">
+						<!-- Event -->
+						<div class="info-item">
+							<div class="info-icon">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+									<line x1="16" y1="2" x2="16" y2="6"/>
+									<line x1="8" y1="2" x2="8" y2="6"/>
+									<line x1="3" y1="10" x2="21" y2="10"/>
+								</svg>
+							</div>
+							<div class="info-content">
+								<h4>Event</h4>
+								{#if event.community}
+									<p class="community-link">
+										{#if event.community.learn_more_link}
+											<a href={event.community.learn_more_link} target="_blank" rel="noopener noreferrer">{event.community.name}</a>
+										{:else}
+											{event.community.name}
+										{/if}
+									</p>
+								{/if}
+								<p>{@html formatLineBreaks(event.title)}</p>
+							</div>
 						</div>
-						<div class="info-content">
-							<h4>Event</h4>
-							{#if event.community}
-								<p class="community-link">
-									{#if event.community.learn_more_link}
-										<a href={event.community.learn_more_link} target="_blank" rel="noopener noreferrer">{event.community.name}</a>
-									{:else}
-										{event.community.name}
+
+						<!-- Combined Talent Section -->
+						{#if event.community_host || event.presenter || event.workshop_lead}
+							<div class="info-item">
+								<div class="info-icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+										<circle cx="9" cy="7" r="4"/>
+										<path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+										<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+									</svg>
+								</div>
+								<div class="info-content">
+									{#if event.community_host}
+										<div class="talent-section">
+											<h4>Hosted By</h4>
+											{#if event.community_host.learn_more_link}
+												<p><a href={event.community_host.learn_more_link} target="_blank" rel="noopener noreferrer">{event.community_host.first_name} {event.community_host.last_name}</a></p>
+											{:else}
+												<p>{event.community_host.first_name} {event.community_host.last_name}</p>
+											{/if}
+										</div>
 									{/if}
-								</p>
-							{/if}
-							<p>{@html formatLineBreaks(event.title)}</p>
-						</div>
+									
+									{#if event.presenter}
+										<div class="talent-section">
+											<h4>Presented By</h4>
+											{#if event.presenter.learn_more_link}
+												<p><a href={event.presenter.learn_more_link} target="_blank" rel="noopener noreferrer">{event.presenter.first_name} {event.presenter.last_name}</a></p>
+											{:else}
+												<p>{event.presenter.first_name} {event.presenter.last_name}</p>
+											{/if}
+										</div>
+									{/if}
+									
+									{#if event.workshop_lead}
+										<div class="talent-section">
+											<h4>Workshop By</h4>
+											{#if event.workshop_lead.learn_more_link}
+												<p><a href={event.workshop_lead.learn_more_link} target="_blank" rel="noopener noreferrer">{event.workshop_lead.first_name} {event.workshop_lead.last_name}</a></p>
+											{:else}
+												<p>{event.workshop_lead.first_name} {event.workshop_lead.last_name}</p>
+											{/if}
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/if}
+
+						<!-- Venue -->
+						{#if event.venue}
+							<div class="info-item">
+								<div class="info-icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<!-- Building base -->
+										<rect x="4" y="6" width="16" height="16" rx="1"/>
+										<!-- Windows -->
+										<rect x="7" y="9" width="2" height="2"/>
+										<rect x="11" y="9" width="2" height="2"/>
+										<rect x="15" y="9" width="2" height="2"/>
+										<rect x="7" y="13" width="2" height="2"/>
+										<rect x="11" y="13" width="2" height="2"/>
+										<rect x="15" y="13" width="2" height="2"/>
+										<!-- Door -->
+										<rect x="10" y="17" width="4" height="5"/>
+										<!-- Roof -->
+										<path d="M4 6l8-4 8 4"/>
+									</svg>
+								</div>
+								<div class="info-content">
+									<h4>Venue</h4>
+									{#if event.venue.learn_more_link}
+										<p class="venue-name"><a href={event.venue.learn_more_link} target="_blank" rel="noopener noreferrer">{event.venue.name}</a></p>
+									{:else}
+										<p class="venue-name">{event.venue.name}</p>
+									{/if}
+									<p class="venue-description">{@html formatLineBreaks(event.venue.description)}</p>
+								</div>
+							</div>
+						{/if}
+
+						<!-- WiFi Access -->
+						{#if event.venue?.wifi_access}
+							<div class="info-item">
+								<div class="info-icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+										<path d="M1 10c6.63-6.63 17.37-6.63 24 0"/>
+										<path d="M5 14c4.42-4.42 11.58-4.42 16 0"/>
+										<path d="M9 18c2.21-2.21 5.79-2.21 8 0"/>
+									</svg>
+								</div>
+								<div class="info-content">
+									<h4>WiFi Access</h4>
+									<p>{@html formatLineBreaks(event.venue.wifi_access)}</p>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Restrooms -->
+						{#if event.venue?.restroom_details}
+							<div class="info-item">
+								<div class="info-icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<!-- Toilet tank (taller) -->
+										<rect x="7" y="2" width="10" height="8" rx="1"/>
+										<!-- Toilet bowl rim -->
+										<ellipse cx="12" cy="10" rx="8" ry="2.5"/>
+										<!-- Toilet bowl -->
+										<path d="M4 10v8c0 3 3.5 5 8 5s8-2 8-5v-8"/>
+										<!-- Toilet seat (closed) -->
+										<ellipse cx="12" cy="10" rx="6" ry="1.5" fill="none"/>
+										<!-- Tank handle -->
+										<circle cx="16" cy="6" r="1"/>
+									</svg>
+								</div>
+								<div class="info-content">
+									<h4>Restrooms</h4>
+									<p>{@html formatLineBreaks(event.venue.restroom_details)}</p>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Refreshments -->
+						{#if event.venue?.food_details}
+							<div class="info-item">
+								<div class="info-icon">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+										<path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+										<line x1="6" y1="1" x2="6" y2="4"/>
+										<line x1="10" y1="1" x2="10" y2="4"/>
+										<line x1="14" y1="1" x2="14" y2="4"/>
+									</svg>
+								</div>
+								<div class="info-content">
+									<h4>Refreshments</h4>
+									<p>{@html formatLineBreaks(event.venue.food_details)}</p>
+								</div>
+							</div>
+						{/if}
 					</div>
-
-					<!-- Combined Talent Section -->
-					{#if event.community_host || event.presenter || event.workshop_lead}
-						<div class="info-item">
-							<div class="info-icon">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-									<circle cx="9" cy="7" r="4"/>
-									<path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-									<path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-								</svg>
-							</div>
-							<div class="info-content">
-								{#if event.community_host}
-									<div class="talent-section">
-										<h4>Hosted By</h4>
-										{#if event.community_host.learn_more_link}
-											<p><a href={event.community_host.learn_more_link} target="_blank" rel="noopener noreferrer">{event.community_host.first_name} {event.community_host.last_name}</a></p>
-										{:else}
-											<p>{event.community_host.first_name} {event.community_host.last_name}</p>
-										{/if}
-									</div>
-								{/if}
-								
-								{#if event.presenter}
-									<div class="talent-section">
-										<h4>Presented By</h4>
-										{#if event.presenter.learn_more_link}
-											<p><a href={event.presenter.learn_more_link} target="_blank" rel="noopener noreferrer">{event.presenter.first_name} {event.presenter.last_name}</a></p>
-										{:else}
-											<p>{event.presenter.first_name} {event.presenter.last_name}</p>
-										{/if}
-									</div>
-								{/if}
-								
-								{#if event.workshop_lead}
-									<div class="talent-section">
-										<h4>Workshop By</h4>
-										{#if event.workshop_lead.learn_more_link}
-											<p><a href={event.workshop_lead.learn_more_link} target="_blank" rel="noopener noreferrer">{event.workshop_lead.first_name} {event.workshop_lead.last_name}</a></p>
-										{:else}
-											<p>{event.workshop_lead.first_name} {event.workshop_lead.last_name}</p>
-										{/if}
-									</div>
-								{/if}
-							</div>
-						</div>
-					{/if}
-
-					<!-- Venue -->
-					{#if event.venue}
-						<div class="info-item">
-							<div class="info-icon">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<!-- Building base -->
-									<rect x="4" y="6" width="16" height="16" rx="1"/>
-									<!-- Windows -->
-									<rect x="7" y="9" width="2" height="2"/>
-									<rect x="11" y="9" width="2" height="2"/>
-									<rect x="15" y="9" width="2" height="2"/>
-									<rect x="7" y="13" width="2" height="2"/>
-									<rect x="11" y="13" width="2" height="2"/>
-									<rect x="15" y="13" width="2" height="2"/>
-									<!-- Door -->
-									<rect x="10" y="17" width="4" height="5"/>
-									<!-- Roof -->
-									<path d="M4 6l8-4 8 4"/>
-								</svg>
-							</div>
-							<div class="info-content">
-								<h4>Venue</h4>
-								{#if event.venue.learn_more_link}
-									<p class="venue-name"><a href={event.venue.learn_more_link} target="_blank" rel="noopener noreferrer">{event.venue.name}</a></p>
-								{:else}
-									<p class="venue-name">{event.venue.name}</p>
-								{/if}
-								<p class="venue-description">{@html formatLineBreaks(event.venue.description)}</p>
-							</div>
-						</div>
-					{/if}
-
-					<!-- WiFi Access -->
-					{#if event.venue?.wifi_access}
-						<div class="info-item">
-							<div class="info-icon">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-									<path d="M1 10c6.63-6.63 17.37-6.63 24 0"/>
-									<path d="M5 14c4.42-4.42 11.58-4.42 16 0"/>
-									<path d="M9 18c2.21-2.21 5.79-2.21 8 0"/>
-								</svg>
-							</div>
-							<div class="info-content">
-								<h4>WiFi Access</h4>
-								<p>{@html formatLineBreaks(event.venue.wifi_access)}</p>
-							</div>
-						</div>
-					{/if}
-
-					<!-- Restrooms -->
-					{#if event.venue?.restroom_details}
-						<div class="info-item">
-							<div class="info-icon">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<!-- Toilet tank (taller) -->
-									<rect x="7" y="2" width="10" height="8" rx="1"/>
-									<!-- Toilet bowl rim -->
-									<ellipse cx="12" cy="10" rx="8" ry="2.5"/>
-									<!-- Toilet bowl -->
-									<path d="M4 10v8c0 3 3.5 5 8 5s8-2 8-5v-8"/>
-									<!-- Toilet seat (closed) -->
-									<ellipse cx="12" cy="10" rx="6" ry="1.5" fill="none"/>
-									<!-- Tank handle -->
-									<circle cx="16" cy="6" r="1"/>
-								</svg>
-							</div>
-							<div class="info-content">
-								<h4>Restrooms</h4>
-								<p>{@html formatLineBreaks(event.venue.restroom_details)}</p>
-							</div>
-						</div>
-					{/if}
-
-					<!-- Refreshments -->
-					{#if event.venue?.food_details}
-						<div class="info-item">
-							<div class="info-icon">
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
-									<path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-									<line x1="6" y1="1" x2="6" y2="4"/>
-									<line x1="10" y1="1" x2="10" y2="4"/>
-									<line x1="14" y1="1" x2="14" y2="4"/>
-								</svg>
-							</div>
-							<div class="info-content">
-								<h4>Refreshments</h4>
-								<p>{@html formatLineBreaks(event.venue.food_details)}</p>
-							</div>
-						</div>
-					{/if}
-				</div>
+				{/if}
 
 				<div class="check-in-another">
 					<Button variant="primary" onclick={handleCheckInAnother}>

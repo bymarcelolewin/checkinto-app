@@ -174,13 +174,24 @@ Resolve PostgreSQL reserved keyword conflicts by renaming "group" table to "comm
 | F076 | Component Code Updates | Update all components to use Community types and references | Medium | 🟢 Completed |
 | F077 | PostgreSQL Compatibility | Eliminate reserved keyword conflicts in database functions | High | 🟢 Completed |
 
-## v1.3.2-migrate-to-new-github-org - 🔴 Not Started
+## v1.3.2-migrate-to-new-github-org - 🟢 Completed
 Comprehensive migration of CheckInto project from `icodewith-ai` organization to `checkinto-io` organization with service account consolidation.
 
 | ID  | Feature                 | Description                              | Priority | Status |
 |-----|-------------------------|------------------------------------------|----------|--------|
-| F078 | GitHub Repository Migration | Transfer checkinto-app from icodewith-ai to checkinto-io organization | High | 🔴 Not Started |
-| F079 | Service Account Updates | Update Vercel username to bymarcelolewin and team to checkintoapp-projects | High | 🔴 Not Started |
-| F080 | Supabase Organization Rename | Update Supabase organization display name to "Check Into App" | Medium | 🔴 Not Started |
-| F081 | Documentation Updates | Update all repository references and contact information | Medium | 🔴 Not Started |
-| F082 | Deployment Verification | Ensure all services continue working with new configuration | High | 🔴 Not Started |
+| F078 | GitHub Repository Migration | Transfer checkinto-app from icodewith-ai to checkinto-io organization | High | 🟢 Completed |
+| F079 | Service Account Updates | Update Vercel username to bymarcelolewin and team to checkintoapp-projects | High | 🟢 Completed |
+| F080 | Supabase Organization Rename | Update Supabase organization display name to "Check Into App" | Medium | 🟢 Completed |
+| F081 | Documentation Updates | Update all repository references and contact information | Medium | 🟢 Completed |
+| F082 | Deployment Verification | Ensure all services continue working with new configuration | High | 🟢 Completed |
+
+## v1.3.3-add-event-flag-for-checked-in-page - 🔴 Not Started
+Add event-level control for displaying detailed information on the confirmation page to provide organizers flexibility in what attendees see after checking in.
+
+| ID  | Feature                 | Description                              | Priority | Status |
+|-----|-------------------------|------------------------------------------|----------|--------|
+| F083 | Database Schema Enhancement | Add show_event_details boolean field to event table with default true | High | 🔴 Not Started |
+| F084 | Database Migration Script | Create migration to add field and set all existing events to true | High | 🔴 Not Started |
+| F085 | Conditional UI Rendering | Modify confirmation page to conditionally show/hide event details box | High | 🔴 Not Started |
+| F086 | Data Fetching Optimization | Skip event details queries when show_event_details is false | Medium | 🔴 Not Started |
+| F087 | TypeScript Interface Updates | Update Event interface to include show_event_details field | Medium | 🔴 Not Started |

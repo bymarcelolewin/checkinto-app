@@ -20,6 +20,36 @@ export class DatabaseService {
 	 */
 	static async getEventByUrlIdAndProfile(urlId: string, profileName: string): Promise<Event | null> {
 		try {
+			// First, get the basic event data including show_event_details flag
+			const { data: eventData, error: eventError } = await supabase
+				.from('event')
+				.select(`
+					*,
+					community:community_id!inner (profilename, name, banner)
+				`)
+				.eq('url_id', urlId)
+				.eq('active', true)
+				.eq('community.profilename', profileName)
+				.single();
+
+			if (eventError) {
+				// Handle specific error cases
+				if (eventError.code === 'PGRST116') {
+					console.warn(`Event not found or inactive: ${urlId} for community: ${profileName}`);
+				} else if (eventError.message?.includes('foreign key')) {
+					console.error(`Foreign key constraint issue for event: ${urlId}`, eventError);
+				} else {
+					console.error('Error fetching event:', eventError);
+				}
+				return null;
+			}
+
+			// If show_event_details is false, return with basic community info (for banner display)
+			if (!eventData.show_event_details) {
+				return eventData as Event;
+			}
+
+			// If show_event_details is true, fetch the full event with all related data
 			const { data, error } = await supabase
 				.from('event')
 				.select(`
@@ -36,14 +66,7 @@ export class DatabaseService {
 				.single();
 
 			if (error) {
-				// Handle specific error cases
-				if (error.code === 'PGRST116') {
-					console.warn(`Event not found or inactive: ${urlId} for community: ${profileName}`);
-				} else if (error.message?.includes('foreign key')) {
-					console.error(`Foreign key constraint issue for event: ${urlId}`, error);
-				} else {
-					console.error('Error fetching event:', error);
-				}
+				console.error('Error fetching event with details:', error);
 				return null;
 			}
 
@@ -59,6 +82,35 @@ export class DatabaseService {
 	 */
 	static async getEventByUrlId(urlId: string): Promise<Event | null> {
 		try {
+			// First, get the basic event data including show_event_details flag
+			const { data: eventData, error: eventError } = await supabase
+				.from('event')
+				.select(`
+					*,
+					community:community_id (name, banner)
+				`)
+				.eq('url_id', urlId)
+				.eq('active', true)
+				.single();
+
+			if (eventError) {
+				// Handle specific error cases
+				if (eventError.code === 'PGRST116') {
+					console.warn(`Event not found or inactive: ${urlId}`);
+				} else if (eventError.message?.includes('foreign key')) {
+					console.error(`Foreign key constraint issue for event: ${urlId}`, eventError);
+				} else {
+					console.error('Error fetching event:', eventError);
+				}
+				return null;
+			}
+
+			// If show_event_details is false, return with basic community info (for banner display)
+			if (!eventData.show_event_details) {
+				return eventData as Event;
+			}
+
+			// If show_event_details is true, fetch the full event with all related data
 			const { data, error } = await supabase
 				.from('event')
 				.select(`
@@ -74,18 +126,11 @@ export class DatabaseService {
 				.single();
 
 			if (error) {
-				// Handle specific error cases
-				if (error.code === 'PGRST116') {
-					console.warn(`Event not found or inactive: ${urlId}`);
-				} else if (error.message?.includes('foreign key')) {
-					console.error(`Foreign key constraint issue for event: ${urlId}`, error);
-				} else {
-					console.error('Error fetching event:', error);
-				}
+				console.error('Error fetching event with details:', error);
 				return null;
 			}
 
-			// Validate that required relationships exist
+			// Validate that required relationships exist when details are enabled
 			if (!data.community || !data.venue || !data.presenter || !data.workshop_lead || !data.community_host) {
 				console.error(`Event ${urlId} is missing required relationships:`, {
 					hasCommunity: !!data.community,
