@@ -25,7 +25,7 @@ export class DatabaseService {
 				.from('event')
 				.select(`
 					*,
-					community:community_id!inner (profilename, name, banner)
+					community:community_id!inner (profilename, name, banner, donation_link, donation_message)
 				`)
 				.eq('url_id', urlId)
 				.eq('active', true)
@@ -87,7 +87,7 @@ export class DatabaseService {
 				.from('event')
 				.select(`
 					*,
-					community:community_id (name, banner)
+					community:community_id (name, banner, donation_link, donation_message)
 				`)
 				.eq('url_id', urlId)
 				.eq('active', true)

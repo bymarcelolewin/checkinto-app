@@ -210,3 +210,15 @@ Merge welcome and confirmation screens into a unified main screen that shows eve
 | F094 | Preserve show_event_details Flag | Ensure existing flag still controls visibility of event details section | Medium | 🟢 Completed |
 | F095 | Raffle Integration | Maintain raffle winner display functionality on unified screen | Medium | 🟢 Completed |
 | F096 | Clear Check-In Link | Add small "clear check-in" link for users to reset their checked-in state | Low | 🟢 Completed |
+
+## v1.3.5-donation-link - 🟢 Completed
+Add donation call-to-action box below the welcome box, linked to community-specific donation URL.
+
+| ID  | Feature                 | Description                              | Priority | Status |
+|-----|-------------------------|------------------------------------------|----------|--------|
+| F097 | TypeScript Interface Update | Add donation_link and donation_message fields to Community interface | High | 🟢 Completed |
+| F098 | Data Fetching Update | Include donation_link and donation_message in community data query | High | 🟢 Completed |
+| F099 | Donation Box UI | Add donation box with matching gray background styling, visible in both check-in states | High | 🟢 Completed |
+| F100 | Donation Button | Add "Donate" button with green gradient styling linking to donation_link URL | High | 🟢 Completed |
+| F101 | Conditional Display | Only show donation box when community.donation_link has a value | Medium | 🟢 Completed |
+| F102 | Donation Message | Display community.donation_message with line break support | Medium | 🟢 Completed |

@@ -24,6 +24,8 @@ CREATE TABLE public.community (
   raffle_winners_to_display integer NOT NULL DEFAULT 1 CHECK (raffle_winners_to_display > 0),
   profilename text NOT NULL UNIQUE,
   favicon text NOT NULL CHECK (favicon IS NULL OR length(favicon) > 0 AND length(favicon) <= 255),
+  donation_link text,
+  donation_message text,
   CONSTRAINT community_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.event (

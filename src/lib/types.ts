@@ -8,6 +8,8 @@ export interface Community {
 	profilename: string;
 	favicon: string | null;
 	raffle_winners_to_display: number;
+	donation_link: string | null;
+	donation_message: string | null;
 	created_at: string;
 	updated_at: string;
 }

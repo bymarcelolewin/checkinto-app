@@ -1,6 +1,6 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.3.5-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
 A mobile-first web application that enables seamless self-service check-in for in-person community event attendees with real-time raffle functionality and full multi-tenant support.
@@ -44,6 +44,11 @@ This application streamlines the check-in process for community events by provid
 - **Subdomain-based routing** - Secure event access via `{communityname}.checkinto.io/{eventId}`
 - **Cross-community flexibility** - Same user can participate in multiple communities independently
 - **Scalable design** - Support for unlimited community organizers without conflicts
+
+### ✅ Donation Support
+- Optional donation box with customizable message
+- Database-driven content (no code changes needed)
+- Conditional display - only shows when donation link is configured
 
 ## Tech Stack
 
@@ -153,6 +158,7 @@ For commercial licensing inquiries: marcelo@redpillbluepillstudios.com
 
 ## Version History
 
+- **v1.3.5** - Added optional donation box with database-driven message and link
 - **v1.3.4** - Unified event screen combining welcome and confirmation into single adaptive screen
 - **v1.3.3** - Added event-level flag for controlling event details visibility
 - **v1.3.2** - GitHub organization migration to checkinto-io

@@ -171,11 +171,31 @@
 						<div class="check-in-action">
 							<Button
 								variant="primary"
-								size="large"
+								size="medium"
 								onclick={handleCheckIn}
 							>
 								Check In
 							</Button>
+						</div>
+					</div>
+				{/if}
+
+				{#if event.community?.donation_link}
+					<div class="donation-box">
+						{#if event.community.donation_message}
+							<div class="donation-message">
+								<p>{@html formatLineBreaks(event.community.donation_message)}</p>
+							</div>
+						{/if}
+						<div class="donation-action">
+							<a
+								href={event.community.donation_link}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="btn-base btn-primary btn-medium donate-button"
+							>
+								Donate
+							</a>
 						</div>
 					</div>
 				{/if}
@@ -434,12 +454,12 @@
 	.welcome-box {
 		background: var(--color-content-bg);
 		border-radius: 1rem;
-		padding: 2rem;
+		padding: 1.5rem;
 		text-align: center;
 		box-shadow: 0 10px 25px var(--shadow-light);
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem;
 	}
 
 	.welcome-message {
@@ -466,6 +486,43 @@
 	.check-in-action {
 		display: flex;
 		justify-content: center;
+	}
+
+	.donation-box {
+		background: var(--color-content-bg);
+		border-radius: 1rem;
+		padding: 1.5rem;
+		text-align: center;
+		box-shadow: 0 10px 25px var(--shadow-light);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.donation-message {
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--color-text-secondary);
+	}
+
+	.donation-message p {
+		margin: 0;
+	}
+
+	.donation-action {
+		display: flex;
+		justify-content: center;
+	}
+
+	.donate-button {
+		background: linear-gradient(135deg, var(--color-primary-gradient-start) 0%, var(--color-primary-gradient-end) 100%);
+		color: white;
+		text-decoration: none;
+	}
+
+	.donate-button:hover {
+		background: linear-gradient(135deg, var(--color-primary-gradient-end) 0%, var(--color-primary-gradient-start) 100%);
+		color: white;
 	}
 
 	.clear-storage-footer {
@@ -622,8 +679,9 @@
 			height: 36px;
 		}
 
-		.welcome-box {
-			padding: 1.5rem;
+		.welcome-box,
+		.donation-box {
+			padding: 1.25rem;
 		}
 
 		.event-info-grid {
