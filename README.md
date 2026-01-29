@@ -1,6 +1,6 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.3.4-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
 A mobile-first web application that enables seamless self-service check-in for in-person community event attendees with real-time raffle functionality and full multi-tenant support.
@@ -18,12 +18,12 @@ This application streamlines the check-in process for community events by provid
 
 **For Attendees:**
 1. Visit your community's custom URL: `https://{communityname}.checkinto.io/{eventId}`
-2. Complete the simple three-screen flow:
-   - **Welcome Screen** - Event-specific landing page with community branding
+2. Complete the simple two-screen flow:
+   - **Event Screen** - View event details, venue info, and hosts immediately. Click "Check In" to register
    - **Check-In Form** - Provide name, email, and an interesting fact
-   - **Confirmation Screen** - View venue details and watch for raffle announcements
+   - After check-in, return to the Event Screen showing "You're checked in!" with raffle announcements
 
-**Example:** [https://ibuildwithaimeetup.checkinto.io/082025](https://ibuildwithaimeetup.checkinto.io/082025)
+**Example:** [https://ibuildwithaimeetup.checkinto.io/012026](https://ibuildwithaimeetup.checkinto.io/012026)
 
 ## Key Features
 
@@ -83,6 +83,27 @@ PUBLIC_SUPABASE_URL=your_supabase_project_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
+## Local Development
+
+To run the application locally:
+
+```sh
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+To test a specific event, use the community query parameter:
+```
+http://localhost:5173/{eventId}?community={communityname}
+```
+
+Example: `http://localhost:5173/012026?community=ibuildwithaimeetup`
+
 ## Image Asset Organization
 
 Assets are organized in a community-based structure for multi-tenant scaling:
@@ -132,7 +153,10 @@ For commercial licensing inquiries: marcelo@redpillbluepillstudios.com
 
 ## Version History
 
-- **v1.3.1** - DB Schema update for group table to "community" table.
+- **v1.3.4** - Unified event screen combining welcome and confirmation into single adaptive screen
+- **v1.3.3** - Added event-level flag for controlling event details visibility
+- **v1.3.2** - GitHub organization migration to checkinto-io
+- **v1.3.1** - DB Schema update for group table to "community" table
 - **v1.3.0** - Complete multi-tenant architecture with data isolation and secure routing
 - **v1.2.0** - CSS consolidation and styling improvements
 - **v1.1.0** - Multi-tenant image folder restructure with community-based organization
