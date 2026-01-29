@@ -8,7 +8,7 @@ import {
 import { validateAndCleanupConfirmationState, canPersistConfirmationState } from '$lib/utils/state-validation';
 import type { Event } from '$lib/types';
 
-export type Screen = 'welcome' | 'checkin' | 'confirmation';
+export type Screen = 'event' | 'checkin';
 
 export interface NavigationState {
 	currentScreen: Screen;
@@ -18,7 +18,7 @@ export interface NavigationState {
 }
 
 const initialState: NavigationState = {
-	currentScreen: 'welcome',
+	currentScreen: 'event',
 	eventId: '',
 	isLoading: false,
 	error: null
@@ -28,30 +28,19 @@ export const navigationStore = writable<NavigationState>(initialState);
 
 // Navigation actions
 export const navigationActions = {
-	// Set the event ID and check for persistent confirmation state
+	// Set the event ID - always start at event screen (checked-in state handled by component)
 	setEvent: (eventId: string, event?: Event | null) => {
-		// First validate and cleanup any existing confirmation state
-		const validatedState = validateAndCleanupConfirmationState(eventId, event || null);
-		
-		// If we have a valid confirmation state, go directly to confirmation
-		if (validatedState && validatedState.isConfirmed) {
-			navigationStore.update(state => ({
-				...state,
-				eventId,
-				currentScreen: 'confirmation',
-				error: null,
-				isLoading: false
-			}));
-		} else {
-			// No valid confirmation state, start at welcome screen
-			navigationStore.update(state => ({
-				...state,
-				eventId,
-				currentScreen: 'welcome',
-				error: null,
-				isLoading: false
-			}));
-		}
+		// Validate and cleanup any existing confirmation state
+		validateAndCleanupConfirmationState(eventId, event || null);
+
+		// Always navigate to event screen - the component will handle checked-in state display
+		navigationStore.update(state => ({
+			...state,
+			eventId,
+			currentScreen: 'event',
+			error: null,
+			isLoading: false
+		}));
 	},
 
 	// Navigate to a specific screen
@@ -73,7 +62,7 @@ export const navigationActions = {
 		}));
 	},
 
-	// Navigate to confirmation screen and persist state
+	// Complete check-in and return to event screen with confirmed state
 	completeCheckin: (event?: Event | null, attendeeEmail?: string) => {
 		navigationStore.update(state => {
 			// Store confirmation state if persistence is allowed
@@ -83,7 +72,7 @@ export const navigationActions = {
 
 			return {
 				...state,
-				currentScreen: 'confirmation',
+				currentScreen: 'event',
 				error: null
 			};
 		});

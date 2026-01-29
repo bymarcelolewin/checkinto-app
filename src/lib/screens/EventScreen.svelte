@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import { Button } from '$lib/components';
-	import { navigationActions, formActions, formResetTrigger } from '$lib/stores';
+	import { navigationActions } from '$lib/stores';
 	import { fetchRaffleWinners, getOrdinal, isWinner } from '$lib/utils/raffle';
-	import { getConfirmationState } from '$lib/utils/storage';
+	import { getConfirmationState, hasConfirmationState, clearConfirmationState } from '$lib/utils/storage';
 	import { getImagePath, IMAGE_CATEGORIES } from '$lib/utils/imagePaths';
 	import type { Event, RaffleWinner } from '$lib/types';
-	import { onMount, onDestroy } from 'svelte';
 
 	interface Props {
 		event: Event | null;
@@ -14,87 +14,80 @@
 	}
 
 	let { event, isLoading = false, error = null }: Props = $props();
-	
+
+	// Check if user is already checked in (from localStorage)
+	let isCheckedIn = $state(false);
+
 	// Raffle state
 	let raffleWinners = $state<RaffleWinner[]>([]);
 	let currentUserEmail = $state<string>('');
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
-	const handleNewCheckIn = () => {
-		formActions.reset();
-		navigationActions.goToScreen('welcome');
+	const handleCheckIn = () => {
+		navigationActions.startCheckin();
 	};
 
-	const handleCheckInAnother = () => {
-		formActions.reset();
-		clearFormInputs();
-		navigationActions.reset(); // This now clears localStorage and resets to initial state
-	};
-
-	// Force clear all form inputs to prevent browser autocomplete persistence
-	const clearFormInputs = () => {
-		// Use a more aggressive approach to clear form state
-		setTimeout(() => {
-			// Clear all inputs on the page
-			const inputs = document.querySelectorAll('input, textarea') as NodeListOf<HTMLInputElement | HTMLTextAreaElement>;
-			inputs.forEach(input => {
-				input.value = '';
-				input.defaultValue = '';
-				// Clear autocomplete and force reset
-				input.setAttribute('autocomplete', 'new-password'); // This tricks browsers into not using cached data
-				input.removeAttribute('autocomplete');
-			});
-			
-			// Force a complete form reset by recreating form elements
-			const forms = document.querySelectorAll('form') as NodeListOf<HTMLFormElement>;
-			forms.forEach(form => {
-				form.reset();
-			});
-		}, 50);
-	};
-	
-	// Get current user's email from localStorage
-	onMount(() => {
-		// Get the email from the stored confirmation state
+	const handleClearStorage = () => {
 		if (event?.url_id) {
-			const confirmationState = getConfirmationState(event.url_id);
-			if (confirmationState?.attendeeEmail) {
-				currentUserEmail = confirmationState.attendeeEmail;
+			clearConfirmationState(event.url_id);
+			isCheckedIn = false;
+			currentUserEmail = '';
+			raffleWinners = [];
+			// Stop raffle polling
+			if (pollingInterval) {
+				clearInterval(pollingInterval);
+				pollingInterval = null;
 			}
 		}
-		
-		// Start polling for raffle winners if event exists
-		if (event?.id) {
-			startPollingForWinners();
+	};
+
+	// Get current user's email from localStorage and check confirmation status
+	onMount(() => {
+		if (event?.url_id) {
+			// Check if user is checked in
+			isCheckedIn = hasConfirmationState(event.url_id);
+
+			// Get the email from the stored confirmation state
+			if (isCheckedIn) {
+				const confirmationState = getConfirmationState(event.url_id);
+				if (confirmationState?.attendeeEmail) {
+					currentUserEmail = confirmationState.attendeeEmail;
+				}
+
+				// Start polling for raffle winners only if checked in
+				if (event?.id) {
+					startPollingForWinners();
+				}
+			}
 		}
 	});
-	
+
 	onDestroy(() => {
 		// Clean up polling interval
 		if (pollingInterval) {
 			clearInterval(pollingInterval);
 		}
 	});
-	
+
 	// Poll for raffle winners every 5 seconds
 	const startPollingForWinners = () => {
 		// Initial check
 		checkForWinners();
-		
+
 		// Set up polling interval
 		pollingInterval = setInterval(() => {
 			checkForWinners();
 		}, 5000); // 5 seconds
 	};
-	
+
 	// Check for raffle winners
 	const checkForWinners = async () => {
 		if (!event?.id) return;
-		
+
 		const winners = await fetchRaffleWinners(event.id);
 		raffleWinners = winners;
 	};
-	
+
 	// Check if current user is a winner
 	const isCurrentUserWinner = (winner: RaffleWinner): boolean => {
 		return isWinner(winner.email, currentUserEmail);
@@ -107,23 +100,20 @@
 	};
 </script>
 
-<div class="confirmation-screen">
+<div class="event-screen">
 	{#if isLoading}
 		<div class="loading-state">
 			<div class="loading-spinner"></div>
-			<p>Processing check-in...</p>
+			<p>Loading event...</p>
 		</div>
 	{:else if error}
 		<div class="error-state">
-			<h1>Check-in Error</h1>
+			<h1>Event Not Available</h1>
 			<p>{error}</p>
-			<Button variant="secondary" onclick={handleNewCheckIn}>
-				Try Again
-			</Button>
 		</div>
 	{:else if event}
-		<div class="confirmation-content">
-			{#if raffleWinners.length > 0}
+		<div class="event-content">
+			{#if isCheckedIn && raffleWinners.length > 0}
 				<div class="raffle-winner-announcement">
 					<h2 class="raffle-title">
 						<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -151,22 +141,45 @@
 					</div>
 				</div>
 			{/if}
-			<header class="success-header">
+
+			<header class="event-header">
 				{#if event.community?.banner}
 					<div class="logo-container">
 						<img src={getImagePath(event.community.banner, IMAGE_CATEGORIES.COMMUNITY, event.community.profilename)} alt={event.community.name} class="community-banner" />
 					</div>
 				{/if}
-				<h1 class="success-title">
-					<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="success-icon-inline">
-						<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-						<polyline points="22,4 12,14.01 9,11.01"/>
-					</svg>
-					You're checked in!
-				</h1>
+
+				{#if isCheckedIn}
+					<h1 class="status-title checked-in">
+						<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="status-icon">
+							<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+							<polyline points="22,4 12,14.01 9,11.01"/>
+						</svg>
+						You're checked in!
+					</h1>
+				{/if}
 			</header>
 
-			<main class="confirmation-main">
+			<main class="event-main">
+				{#if !isCheckedIn}
+					<div class="welcome-box">
+						{#if event.welcome_message}
+							<div class="welcome-message">
+								<p>{@html formatLineBreaks(event.welcome_message)}</p>
+							</div>
+						{/if}
+						<div class="check-in-action">
+							<Button
+								variant="primary"
+								size="large"
+								onclick={handleCheckIn}
+							>
+								Check In
+							</Button>
+						</div>
+					</div>
+				{/if}
+
 				{#if event.show_event_details}
 					<div class="event-info-grid">
 						<!-- Event -->
@@ -216,7 +229,7 @@
 											{/if}
 										</div>
 									{/if}
-									
+
 									{#if event.presenter}
 										<div class="talent-section">
 											<h4>Presented By</h4>
@@ -227,7 +240,7 @@
 											{/if}
 										</div>
 									{/if}
-									
+
 									{#if event.workshop_lead}
 										<div class="talent-section">
 											<h4>Workshop By</h4>
@@ -335,27 +348,26 @@
 						{/if}
 					</div>
 				{/if}
-
-				<div class="check-in-another">
-					<Button variant="primary" onclick={handleCheckInAnother}>
-						Check In Another Person
-					</Button>
-				</div>
 			</main>
+
+			{#if isCheckedIn}
+				<footer class="clear-storage-footer">
+					<button type="button" class="clear-storage-link" onclick={handleClearStorage}>
+						Clear check-in
+					</button>
+				</footer>
+			{/if}
 		</div>
 	{:else}
 		<div class="error-state">
 			<h1>Event Not Found</h1>
-			<p>Unable to load event information.</p>
-			<Button variant="secondary" onclick={handleNewCheckIn}>
-				Start Over
-			</Button>
+			<p>This event can't be found or is no longer active.</p>
 		</div>
 	{/if}
 </div>
 
 <style>
-	.confirmation-screen {
+	.event-screen {
 		min-height: 100vh;
 		background: linear-gradient(135deg, var(--color-primary-gradient-start) 0%, var(--color-primary-gradient-end) 100%);
 		padding: 15px;
@@ -367,14 +379,14 @@
 		box-sizing: border-box;
 	}
 
-	.confirmation-content {
+	.event-content {
 		width: 100%;
 		max-width: 500px;
 		margin: 0 auto;
 		text-align: center;
 	}
 
-	.success-header {
+	.event-header {
 		margin-bottom: 2rem;
 	}
 
@@ -392,7 +404,7 @@
 		box-shadow: 0 4px 12px var(--shadow-base);
 	}
 
-	.success-title {
+	.status-title {
 		font-size: 2.5rem;
 		font-weight: bold;
 		margin: 0;
@@ -403,16 +415,77 @@
 		gap: 0.75rem;
 	}
 
-	.success-icon-inline {
+	.status-title.checked-in {
+		color: white;
+	}
+
+	.status-icon {
 		color: white;
 		filter: drop-shadow(0 4px 8px var(--shadow-base));
 		flex-shrink: 0;
 	}
 
-	.confirmation-main {
+	.event-main {
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
+	}
+
+	.welcome-box {
+		background: var(--color-content-bg);
+		border-radius: 1rem;
+		padding: 2rem;
+		text-align: center;
+		box-shadow: 0 10px 25px var(--shadow-light);
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.welcome-message {
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--color-text-secondary);
+	}
+
+	/* Green button with gray text for welcome box */
+	.welcome-box :global(.btn-primary) {
+		background: linear-gradient(135deg, var(--color-primary-gradient-start) 0%, var(--color-primary-gradient-end) 100%);
+		color: white;
+	}
+
+	.welcome-box :global(.btn-primary:hover:not(:disabled)) {
+		background: linear-gradient(135deg, var(--color-primary-gradient-end) 0%, var(--color-primary-gradient-start) 100%);
+		color: white;
+	}
+
+	.welcome-message p {
+		margin: 0;
+	}
+
+	.check-in-action {
+		display: flex;
+		justify-content: center;
+	}
+
+	.clear-storage-footer {
+		margin-top: 2rem;
+		text-align: center;
+	}
+
+	.clear-storage-link {
+		background: none;
+		border: none;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 0.625rem;
+		cursor: pointer;
+		padding: 0.5rem;
+		text-decoration: underline;
+		min-height: auto;
+	}
+
+	.clear-storage-link:hover {
+		color: rgba(255, 255, 255, 0.8);
 	}
 
 	.event-info-grid {
@@ -497,12 +570,6 @@
 		margin-bottom: 0.25rem;
 	}
 
-	.check-in-another {
-		margin-top: 2rem;
-		margin-bottom: 2rem;
-		text-align: center;
-	}
-
 	/* Loading and error states */
 	.loading-state,
 	.error-state {
@@ -541,25 +608,29 @@
 
 	/* Mobile optimization */
 	@media (max-width: 640px) {
-		.confirmation-screen {
+		.event-screen {
 			padding: 15px;
 		}
-		
-		.success-title {
+
+		.status-title {
 			font-size: 2rem;
 			gap: 0.5rem;
 		}
 
-		.success-icon-inline {
+		.status-icon {
 			width: 36px;
 			height: 36px;
 		}
-		
+
+		.welcome-box {
+			padding: 1.5rem;
+		}
+
 		.event-info-grid {
 			padding: 1.5rem;
 			gap: 1rem;
 		}
-		
+
 		.info-item {
 			gap: 0.75rem;
 		}
@@ -571,7 +642,7 @@
 			grid-template-columns: 1fr 1fr;
 		}
 	}
-	
+
 	/* Raffle Winner Announcement Styles */
 	.raffle-winner-announcement {
 		background: linear-gradient(135deg, var(--color-success-bg-start) 0%, var(--color-success-bg-end) 100%);
@@ -584,7 +655,7 @@
 		position: relative;
 		overflow: hidden;
 	}
-	
+
 	.raffle-winner-announcement::before {
 		content: '';
 		position: absolute;
@@ -600,7 +671,7 @@
 		);
 		animation: shimmer 3s infinite;
 	}
-	
+
 	@keyframes slideDown {
 		from {
 			transform: translateY(-20px);
@@ -611,7 +682,7 @@
 			opacity: 1;
 		}
 	}
-	
+
 	@keyframes shimmer {
 		0% {
 			transform: translateX(-100%) translateY(-100%) rotate(45deg);
@@ -620,7 +691,7 @@
 			transform: translateX(100%) translateY(100%) rotate(45deg);
 		}
 	}
-	
+
 	.raffle-title {
 		font-size: 1.75rem;
 		font-weight: bold;
@@ -633,12 +704,12 @@
 		position: relative;
 		z-index: 1;
 	}
-	
+
 	.raffle-title svg {
 		fill: white;
 		animation: sparkle 1.5s ease-in-out infinite;
 	}
-	
+
 	@keyframes sparkle {
 		0%, 100% {
 			transform: scale(1) rotate(0deg);
@@ -647,7 +718,7 @@
 			transform: scale(1.2) rotate(180deg);
 		}
 	}
-	
+
 	.winners-list {
 		display: flex;
 		flex-direction: column;
@@ -655,7 +726,7 @@
 		position: relative;
 		z-index: 1;
 	}
-	
+
 	.winner-item {
 		background: var(--overlay-white);
 		border-radius: 0.5rem;
@@ -663,21 +734,21 @@
 		backdrop-filter: blur(10px);
 		transition: all 0.3s ease;
 	}
-	
+
 	.winner-item.is-you {
 		background: linear-gradient(135deg, var(--color-winner-bg-start) 0%, var(--color-winner-bg-end) 100%);
 		border: 2px solid var(--color-winner-border);
 		animation: pulse 2s infinite;
 		box-shadow: 0 4px 20px var(--shadow-winner);
 	}
-	
+
 	.winner-item.is-you .winner-place,
 	.winner-item.is-you .winner-name,
 	.winner-item.is-you .winner-message {
 		color: white;
 		text-shadow: 0 1px 3px var(--shadow-text);
 	}
-	
+
 	@keyframes pulse {
 		0%, 100% {
 			transform: scale(1);
@@ -688,7 +759,7 @@
 			box-shadow: 0 0 0 10px var(--shadow-winner-pulse-end);
 		}
 	}
-	
+
 	.winner-place {
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -697,20 +768,20 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
-	
+
 	.winner-name {
 		font-size: 1.25rem;
 		font-weight: bold;
 		margin-bottom: 0.25rem;
 	}
-	
+
 	.winner-message {
 		font-size: 1rem;
 		margin-top: 0.5rem;
 		font-weight: 600;
 		animation: bounce 1s ease-in-out infinite;
 	}
-	
+
 	@keyframes bounce {
 		0%, 100% {
 			transform: translateY(0);
@@ -719,17 +790,17 @@
 			transform: translateY(-5px);
 		}
 	}
-	
+
 	@media (max-width: 640px) {
 		.raffle-title {
 			font-size: 1.5rem;
 		}
-		
+
 		.raffle-title svg {
 			width: 24px;
 			height: 24px;
 		}
-		
+
 		.winner-name {
 			font-size: 1.125rem;
 		}

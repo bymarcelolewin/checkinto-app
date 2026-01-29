@@ -23,7 +23,7 @@ This application streamlines the check-in process for community events by provid
    - **Check-In Form** - Provide name, email, and an interesting fact
    - **Confirmation Screen** - View venue details and watch for raffle announcements
 
-**Example:** [https://codingwithai.checkinto.io/082025](https://codingwithai.checkinto.io/082025)
+**Example:** [https://ibuildwithaimeetup.checkinto.io/082025](https://ibuildwithaimeetup.checkinto.io/082025)
 
 ## Key Features
 
@@ -72,9 +72,9 @@ The application automatically:
 4. **Provides fallback routing** for development environments via URL parameters
 
 Examples:
-- `https://codingwithai.checkinto.io/082025` - Coding with AI community, August 2025 event
+- `https://ibuildwithaimeetup.checkinto.io/082025` - Building with AI community, August 2025 event
 - `https://seattle.checkinto.io/082025` - Seattle community, August 2025 event (same ID, different community - no conflict!)
-- `http://localhost:5173/082025?community=codingwithai` - Development routing
+- `http://localhost:5173/082025?community=ibuildwithaimeetup` - Development routing
 
 ## Environment Variables
 
@@ -97,8 +97,8 @@ static/images/communities/
 
 **Example:**
 ```
-static/images/communities/codingwithai/
-├── community/codingwithai-banner.png
+static/images/communities/ibuildwithaimeetup/
+├── community/ibuildwithaimeetup-banner.png
 ├── talent/marcelo-lewin.png
 └── events/ (for future event images)
 ```
@@ -113,7 +113,7 @@ static/images/communities/codingwithai/
 
 ### Real-World Example
 A user with email `john@example.com` can:
-1. Register for `codingwithai.checkinto.io/082025` as "John Smith"
+1. Register for `ibuildwithaimeetup.checkinto.io/082025` as "John Smith"
 2. Register for `seattle.checkinto.io/082025` as "J. Smith" 
 3. Register for `vancouver.checkinto.io/082025` as "Johnny"
 

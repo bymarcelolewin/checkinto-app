@@ -1,6 +1,6 @@
 # AGENT INSTRUCTIONS:
 - Read this entire document and commit it to memory.
-- Make sure you check this document often if you need to understand how to process any Cody Framework commands.
+- Make sure you check this document often if you need to understand how to process any Cody Product Builder commands.
 - Anything that has **[AGENT TODO: to do item]** means you need to take action.
 - When you see **AGENT ANNOUNCE**, anthing in betweeen the ```[message]``` (tick marks), you will display to the user exactly was stated.
 - After every phase, make sure you re-read this document.
@@ -10,11 +10,11 @@
     - **USER** Is the human guding you in the building process.
     - **AGENT** That's you!  The AI Development **AGENT**.
 
-## About Cody Framework
-Cody Framework is a spec-driven development framework built specifically to help Vibe Coders bring their ideas to life. Cody guides builders through idea discovery and refinement, transforming vague concepts into well-defined plans, then breaking them into manageable chunks (called versions) for systematic implementation, all without stifling creativity. It is designed for Claude Code, Codex, Gemini CLI, OpenCode, Cursor, Copilot, and other AI coding environments.
+## About Cody Product Builder
+Cody Product Builder is a spec-driven development AI agent skill built specifically to help Vibe Coders bring their ideas to life. Cody guides builders through idea discovery and refinement, transforming vague concepts into well-defined plans, then breaking them into manageable chunks (called versions) for systematic implementation, all without stifling creativity. It is designed for Claude Code, Codex, Gemini CLI, OpenCode, Cursor, Copilot, and other AI coding environments.
 
 ## About Phases
-Cody Framework has the following 2 phases that all **USERS** will go through:
+Cody Product Builder has the following 2 phases that all **USERS** will go through:
 
 ### 1. Plan
 This phase guides **USERS** through the creation of documents that help define, transform and formalize their product idea into actionable documents.
@@ -32,6 +32,7 @@ This phase guides USERS through the iterative development cycle by creating docu
 | Document | Description |
 |----------|-------------|
 | `feature-backlog.md` | This document lists features and enhancements derived from the plan. It lives on the top level of the Build phase, accessible by all versions. It is a living document that will evolve throughout the project. It is grouped by version (each version is a table), with the Backlog (table) tracking all features not added to a version yet.  It is used to build versions. |
+| `release-notes.md` | This document provides automatic release notes generation and management throughout the build lifecycle. It tracks all versions, key features, enhancements, bug fixes, and other notable changes. This document is created and updated automatically after each version build and during global project updates. |
 
 > Then we create versions based on the feature backlog. The following documents are used for every version a **USER** works on.
 
@@ -59,6 +60,7 @@ These placeholders are a pointer to actual values. They are created here and use
 | {{cfTemplates}} | .cody/config/templates | Cody templates folder |
 | {{cfCommands}} | .cody/config/commands | Cody commands to be executed. |
 | {{cfComponents}} | .cody/config/components | Cody design system components the **AGENT** will use to display stylized messages in the chat window. |
+| {{cfScripts}} | .cody/config/scripts | Cody scripts folder for utility scripts. |
 | {{cfProject}} | .cody/project/ | Project folder for generate files. |
 | {{cfPlanPhase}} | .cody/project/plan | Cody root folder for the planning phase. |
 | {{cfWorkPhase}} | .cody/project/build | Cody root folder for the build phase. |
@@ -99,19 +101,8 @@ The **USER** at times may want to tell the **AGENT** about a particular file tha
 > ### `:cody version add`
 **[AGENT TODO: Read and execute {{cfCommands}}/version-add.md]** 
 
+> ### `:cody upgrade`
+**[AGENT TODO: Read and execute {{cfCommands}}/upgrade.md]**
+
 > ### `:cody version build`
 **[AGENT TODO: Read and execute {{cfCommands}}/version-build.md]** 
-
-## Design System Components
-  - When you execute commands in the {{cfCommands}} folder, you will encounter XML tags.
-  - Only tags that begin with <cf:...> must be executed as a Cody Framework component.
-  - For execution, look up the corresponding file in {{cfComponents}} using the tag name (e.g., <cf:table> → table.md, <cf:card> → card.md).
-  - **CRITICAL**: When you encounter a <cf:...> tag, you MUST:
-    1. Read the corresponding component file from {{cfComponents}}
-    2. Extract the content between the opening and closing <cf:...> tags as the "body"
-    3. Extract any attributes (like headline="...") as arguments
-    4. Some arguments (like widht="50") may be used in the Display Instructions section of the component like this: {{width}}
-    5. Follow the Display Instructions in the component file exactly
-    6. Replace the entire <cf:...> block with the formatted output
-  - Standard HTML tags (e.g., <div>, <p>, <h1>) should not be executed.
-  - If you encounter a <cf:...> tag with no matching file, ask for clarification before proceeding.

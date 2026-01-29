@@ -195,3 +195,18 @@ Add event-level control for displaying detailed information on the confirmation 
 | F085 | Conditional UI Rendering | Modify confirmation page to conditionally show/hide event details box | High | 🟢 Completed |
 | F086 | Data Fetching Optimization | Skip event details queries when show_event_details is false | Medium | 🟢 Completed |
 | F087 | TypeScript Interface Updates | Update Event interface to include show_event_details field | Medium | 🟢 Completed |
+
+## v1.3.4-unified-event-screen - 🟢 Completed
+Merge welcome and confirmation screens into a unified main screen that shows event details immediately, with check-in state controlling button display.
+
+| ID  | Feature                 | Description                              | Priority | Status |
+|-----|-------------------------|------------------------------------------|----------|--------|
+| F088 | Unified Screen Architecture | Merge welcome and confirmation screens into single main event screen | High | 🟢 Completed |
+| F089 | Conditional Check-In Button | Display "Check In" button for non-checked-in users, "You're checked in!" for checked-in users | High | 🟢 Completed |
+| F090 | Remove Check In Another Person | Remove the "Check In Another Person" button from the UI | Medium | 🟢 Completed |
+| F091 | Event Details on Welcome | Show all event details (venue, hosts, amenities) on initial page load | High | 🟢 Completed |
+| F092 | Form Flow Update | Update form submission to return to main screen instead of separate confirmation | High | 🟢 Completed |
+| F093 | State Management Refactor | Update navigation and state management for unified screen flow | Medium | 🟢 Completed |
+| F094 | Preserve show_event_details Flag | Ensure existing flag still controls visibility of event details section | Medium | 🟢 Completed |
+| F095 | Raffle Integration | Maintain raffle winner display functionality on unified screen | Medium | 🟢 Completed |
+| F096 | Clear Check-In Link | Add small "clear check-in" link for users to reset their checked-in state | Low | 🟢 Completed |

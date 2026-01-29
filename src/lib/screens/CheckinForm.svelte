@@ -76,7 +76,7 @@
 	const handleBack = () => {
 		formActions.reset();
 		clearFormInputs();
-		navigationActions.goToScreen('welcome');
+		navigationActions.goToScreen('event');
 	};
 
 	// Force clear all form inputs to prevent browser autocomplete persistence
@@ -112,8 +112,6 @@
 						<img src={getImagePath(event.community.banner, IMAGE_CATEGORIES.COMMUNITY, event.community.profilename)} alt={event.community.name} class="community-banner" />
 					</div>
 				{/if}
-				<h1 class="form-title">Check In</h1>
-				<p class="event-name">"{event.title}"</p>
 			</header>
 
 			<main class="form-main">
@@ -233,19 +231,6 @@
 		box-shadow: 0 4px 12px var(--shadow-base);
 	}
 
-	.form-title {
-		font-size: 2rem;
-		font-weight: bold;
-		margin: 0 0 0.5rem 0;
-		text-shadow: 0 2px 4px var(--shadow-text);
-	}
-
-	.event-name {
-		font-size: 1.1rem;
-		opacity: 0.9;
-		margin: 0;
-	}
-
 	.form-main {
 		flex: 1;
 		display: flex;
@@ -268,6 +253,17 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+	}
+
+	/* Green gradient button style when active */
+	.checkin-form :global(.btn-primary:not(:disabled)) {
+		background: linear-gradient(135deg, var(--color-primary-gradient-start) 0%, var(--color-primary-gradient-end) 100%);
+		color: white;
+	}
+
+	.checkin-form :global(.btn-primary:hover:not(:disabled)) {
+		background: linear-gradient(135deg, var(--color-primary-gradient-end) 0%, var(--color-primary-gradient-start) 100%);
+		color: white;
 	}
 
 	/* Error state */
@@ -300,13 +296,9 @@
 		.checkin-form-screen {
 			padding: 15px;
 		}
-		
+
 		.checkin-form {
 			padding: 1.5rem;
-		}
-		
-		.form-title {
-			font-size: 1.75rem;
 		}
 	}
 
