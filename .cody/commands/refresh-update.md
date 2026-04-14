@@ -1,6 +1,6 @@
 ---
-command: ":cody refresh update"
-description: Refreshes the memory about the current project of the AI AGENT and the AGENT will update the plan.md and prd.md files with any changes.
+internal: true
+description: Refreshes memory and updates PRD, plan, and release notes. Delegated from refresh.md.
 ---
 
 # REFRESH AGENT MEMORY AND UPDATE DOCS
@@ -43,6 +43,20 @@ description: Refreshes the memory about the current project of the AI AGENT and 
 - Review the all the available versions in the `{{cfWorkPhase}}\build` folder. 
 - Add any new versions that are missing `{{cfWorkPhase}}/release-notes.md`.
 - Make any other necessary changes you see fit to keep this document updated.
+
+### CHECK PROJECT SETTINGS
+- Check if `cody.json` exists in the project root and has a `cody-product-builder` section.
+  - If it does NOT exist, skip this section.
+  - If it DOES exist:
+    - Read the current `cody-product-builder` values for **name** and **description**.
+    - Based on the PRD and plan documents you just reviewed/updated, determine if the project name or description has changed.
+    - If either has changed:
+      - Show the **USER** the current values and the proposed new values.
+      - Ask the **USER** if they want to update the project settings.
+      - **STOP** and wait for the **USER**.
+      - If YES, update the `cody-product-builder` section in `cody.json` with the new values and set **updatedAt** to today's date (use `YYYY-MM-DD` format).
+      - If NO, leave the file as-is.
+    - If neither has changed, skip silently.
 
 # FINISH
 - Tell the **USER** you have completed your memory refresh.
