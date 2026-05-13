@@ -39,7 +39,7 @@ Update the SvelteKit app to use the new RPC. After this phase, `npm run check` a
 | T09 | Rewrite checkInAttendee | Edit `src/lib/database.ts`: replace the multi-step `checkInAttendee` with a single `supabase.rpc('check_in_attendee', {...})` call. Map the RPC's jsonb response to the existing `CheckInResponse` shape. | T08 | 🟢 Completed | AGENT |
 | T10 | Delete now-unused helpers | Remove `createAttendee`, `upsertAttendee`, `updateAttendee`, `getAttendeeByEmail`, `linkAttendeeToEvent`, `isEmailRegisteredForEvent`, `getEventById` from `src/lib/database.ts`. Confirm no references remain via grep. | T09 | 🟢 Completed | AGENT |
 | T11 | Type-check and lint | Run `npm run check` and `npm run lint`. Confirmed v1.4.0 introduces zero new errors. (Pre-existing tooling errors — tsconfig `$lib` resolution issue and ESLint baseline — remain unchanged. Out of scope for this version.) | T10 | 🟢 Completed | AGENT |
-| T12 | Manual smoke test in production | USER deploys via git push, then opens a live event URL, completes a check-in end-to-end against the migrated database, confirms attendee + community_attendee + event_attendee rows appear, tests re-submit idempotency. (Local dev test skipped — no live events at time of deploy, prod smoke test substitutes.) | T11 | 🔴 Not Started | USER |
+| T12 | Manual smoke test in production | USER deploys via git push, then opens a live event URL, completes a check-in end-to-end against the migrated database, confirms attendee + community_attendee + event_attendee rows appear, tests re-submit idempotency. (Local dev test skipped — no live events at time of deploy, prod smoke test substitutes.) All 6 scenarios passed. | T11 | 🟢 Completed | USER |
 
 ## Phase 4: Documentation
 
@@ -59,4 +59,4 @@ Cody Product Builder closeout steps.
 | T15 | Write retrospective | Create `docs/build/v1.4.0-secure-and-restructure-attendee/retrospective.md` from template. | T14 | 🟢 Completed | AGENT |
 | T16 | Update cody.json | Set `version` to `1.4.0` and `updatedAt` to today's date. | T14 | 🟢 Completed | AGENT |
 | T17 | Update release-notes.md | Add v1.4.0 entry to `release-notes.md` at project root. | T14 | 🟢 Completed | AGENT |
-| T18 | Commit to git | USER commits all changes with a descriptive message. | T17 | 🔴 Not Started | USER |
+| T18 | Commit to git | USER commits all changes with a descriptive message. | T17 | 🟢 Completed | USER |
