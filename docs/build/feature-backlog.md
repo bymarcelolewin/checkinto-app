@@ -222,3 +222,19 @@ Add donation call-to-action box below the welcome box, linked to community-speci
 | F100 | Donation Button | Add "Donate" button with green gradient styling linking to donation_link URL | High | 🟢 Completed |
 | F101 | Conditional Display | Only show donation box when community.donation_link has a value | Medium | 🟢 Completed |
 | F102 | Donation Message | Display community.donation_message with line break support | Medium | 🟢 Completed |
+
+## v1.4.0-secure-and-restructure-attendee - 🟢 Completed
+Lock down Data API access via a SECURITY DEFINER check-in function and restructure attendees into a many-to-many relationship with communities via a new join table.
+
+| ID  | Feature                 | Description                              | Priority | Status |
+|-----|-------------------------|------------------------------------------|----------|--------|
+| F103 | community_attendee Join Table | Create new M:N join table linking attendees to communities with composite PK and FKs | High | 🟢 Completed |
+| F104 | Backfill community_attendee | Populate join table from attendee.community_id UNION event_attendee → event.community_id | High | 🟢 Completed |
+| F105 | Drop attendee.community_id | Remove legacy column after successful backfill (same transaction) | High | 🟢 Completed |
+| F106 | check_in_attendee RPC | SECURITY DEFINER function that validates input, upserts attendee on email, links community_attendee, inserts event_attendee idempotently | High | 🟢 Completed |
+| F107 | Drop Permissive Policies | Remove the 5 "Allow public ..." RLS policies on attendee (3) and event_attendee (2) | High | 🟢 Completed |
+| F108 | Revoke Anon Direct Access | Revoke SELECT/INSERT/UPDATE from anon on attendee and event_attendee | High | 🟢 Completed |
+| F109 | RLS on community_attendee | Enable RLS with no anon policies — function-only write path | High | 🟢 Completed |
+| F110 | Rollback Migration | Companion script restoring attendee.community_id, policies, and grants | Medium | 🟢 Completed |
+| F111 | Update database.ts and types.ts | Rewrite checkInAttendee to call RPC, delete now-unused helpers, drop community_id from Attendee type | High | 🟢 Completed |
+| F112 | Update latest-schema.sql | Reflect new attendee/community_attendee structure and tightened grants | Medium | 🟢 Completed |

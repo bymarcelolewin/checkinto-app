@@ -1,5 +1,18 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
+--
+-- Snapshot reflects state after v1.4.0-secure-and-restructure-attendee.
+--
+-- Access model (post-v1.4.0):
+--   - anon has NO direct grants on `attendee`, `event_attendee`, or
+--     `community_attendee`. Anonymous check-in goes through the
+--     `check_in_attendee()` SECURITY DEFINER function (see
+--     database/functions/check-in-attendee.sql).
+--   - anon retains direct SELECT on the four read-only tables: `event`,
+--     `community`, `talent`, `venue`.
+--   - As of 2026-10-30, Supabase no longer auto-grants new public tables
+--     to the Data API roles. Explicit grants are required for any new
+--     table. See database/migrations/CLAUDE.md.
 
 CREATE TABLE public.attendee (
   first_name text NOT NULL,
@@ -9,10 +22,12 @@ CREATE TABLE public.attendee (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  community_id uuid NOT NULL,
-  CONSTRAINT attendee_pkey PRIMARY KEY (id),
-  CONSTRAINT fk_attendee_community FOREIGN KEY (community_id) REFERENCES public.community(id)
+  CONSTRAINT attendee_pkey PRIMARY KEY (id)
 );
+-- No grants for anon. Reads/writes go through check_in_attendee() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.attendee TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.attendee TO service_role;
+
 CREATE TABLE public.community (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
@@ -28,6 +43,22 @@ CREATE TABLE public.community (
   donation_message text,
   CONSTRAINT community_pkey PRIMARY KEY (id)
 );
+GRANT SELECT ON public.community TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.community TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.community TO service_role;
+
+CREATE TABLE public.community_attendee (
+  attendee_id uuid NOT NULL,
+  community_id uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT community_attendee_pkey PRIMARY KEY (attendee_id, community_id),
+  CONSTRAINT community_attendee_attendee_id_fkey FOREIGN KEY (attendee_id) REFERENCES public.attendee(id) ON DELETE CASCADE,
+  CONSTRAINT community_attendee_community_id_fkey FOREIGN KEY (community_id) REFERENCES public.community(id) ON DELETE CASCADE
+);
+-- No grants for anon. Populated by check_in_attendee() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.community_attendee TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.community_attendee TO service_role;
+
 CREATE TABLE public.event (
   show_event_details boolean NOT NULL DEFAULT true,
   url_id text NOT NULL,
@@ -51,6 +82,10 @@ CREATE TABLE public.event (
   CONSTRAINT fk_event_presenter FOREIGN KEY (presenter_id) REFERENCES public.talent(id),
   CONSTRAINT fk_event_venue FOREIGN KEY (venue_id) REFERENCES public.venue(id)
 );
+GRANT SELECT ON public.event TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event TO service_role;
+
 CREATE TABLE public.event_attendee (
   event_id uuid NOT NULL,
   attendee_id uuid NOT NULL,
@@ -61,6 +96,10 @@ CREATE TABLE public.event_attendee (
   CONSTRAINT event_attendee_attendee_id_fkey FOREIGN KEY (attendee_id) REFERENCES public.attendee(id),
   CONSTRAINT event_attendee_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.event(id)
 );
+-- No grants for anon. Inserts go through check_in_attendee() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event_attendee TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event_attendee TO service_role;
+
 CREATE TABLE public.talent (
   first_name text NOT NULL,
   last_name text NOT NULL,
@@ -75,6 +114,10 @@ CREATE TABLE public.talent (
   CONSTRAINT talent_pkey PRIMARY KEY (id),
   CONSTRAINT fk_talent_community FOREIGN KEY (community_id) REFERENCES public.community(id)
 );
+GRANT SELECT ON public.talent TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.talent TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.talent TO service_role;
+
 CREATE TABLE public.venue (
   name text NOT NULL,
   description text NOT NULL,
@@ -89,3 +132,6 @@ CREATE TABLE public.venue (
   CONSTRAINT venue_pkey PRIMARY KEY (id),
   CONSTRAINT fk_venue_community FOREIGN KEY (community_id) REFERENCES public.community(id)
 );
+GRANT SELECT ON public.venue TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.venue TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.venue TO service_role;

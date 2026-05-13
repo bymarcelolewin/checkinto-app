@@ -89,7 +89,6 @@ export interface Attendee {
 	last_name: string;
 	email: string;
 	interesting_fact: string;
-	community_id: string;
 	created_at: string;
 	updated_at: string;
 }
