@@ -88,7 +88,6 @@ export interface Attendee {
 	first_name: string;
 	last_name: string;
 	email: string;
-	interesting_fact: string;
 	created_at: string;
 	updated_at: string;
 }
@@ -96,6 +95,7 @@ export interface Attendee {
 export interface EventAttendee {
 	event_id: string;
 	attendee_id: string;
+	interesting_fact: string;
 	raffle_winner: boolean;
 	raffle_round: number | null;
 	created_at: string;
@@ -124,7 +124,9 @@ export type MeetupInput = CommunityInput; // Legacy alias
 export type VenueInput = Omit<Venue, 'id' | 'created_at' | 'updated_at'>;
 export type TalentInput = Omit<Talent, 'id' | 'created_at' | 'updated_at'>;
 export type EventInput = Omit<Event, 'id' | 'created_at' | 'updated_at' | 'community' | 'venue' | 'presenter'>;
-export type AttendeeInput = Omit<Attendee, 'id' | 'created_at' | 'updated_at'>;
+export type AttendeeInput = Omit<Attendee, 'id' | 'created_at' | 'updated_at'> & {
+	interesting_fact: string;
+};
 export type EventAttendeeInput = Omit<EventAttendee, 'created_at' | 'raffle_winner' | 'raffle_round'>;
 
 // Update Types (for updating records)
@@ -253,8 +255,7 @@ export function isAttendee(obj: unknown): obj is Attendee {
 		typeof (obj as Attendee).id === 'string' &&
 		typeof (obj as Attendee).first_name === 'string' &&
 		typeof (obj as Attendee).last_name === 'string' &&
-		typeof (obj as Attendee).email === 'string' &&
-		typeof (obj as Attendee).interesting_fact === 'string'
+		typeof (obj as Attendee).email === 'string'
 	);
 }
 

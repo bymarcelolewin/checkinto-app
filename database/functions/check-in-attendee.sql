@@ -1,7 +1,7 @@
 -- Function: Check-In Attendee
--- Version: v1.4.0-secure-and-restructure-attendee
+-- Version: v1.5.0-per-event-interesting-fact
 -- Description: Atomic, validated check-in flow callable by the anon role.
---              Replaces the previous multi-query browser-side flow.
+--              Stores per-event interesting_fact on event_attendee.
 -- Usage: SELECT check_in_attendee(p_email, p_first_name, p_last_name, p_interesting_fact, p_event_id);
 --
 -- Security model:
@@ -78,15 +78,15 @@ BEGIN
     END IF;
 
     -- ------------------------------------------------------------------------
-    -- Upsert attendee by email (global identity).
+    -- Upsert attendee by email (global identity). interesting_fact is no
+    -- longer stored here as of v1.5.0; it lives on event_attendee.
     -- ------------------------------------------------------------------------
-    INSERT INTO attendee (email, first_name, last_name, interesting_fact)
-    VALUES (v_email, v_first_name, v_last_name, v_interesting_fact)
+    INSERT INTO attendee (email, first_name, last_name)
+    VALUES (v_email, v_first_name, v_last_name)
     ON CONFLICT (email) DO UPDATE
-        SET first_name       = EXCLUDED.first_name,
-            last_name        = EXCLUDED.last_name,
-            interesting_fact = EXCLUDED.interesting_fact,
-            updated_at       = now()
+        SET first_name = EXCLUDED.first_name,
+            last_name  = EXCLUDED.last_name,
+            updated_at = now()
     RETURNING id INTO v_attendee_id;
 
     -- ------------------------------------------------------------------------
@@ -97,17 +97,19 @@ BEGIN
     ON CONFLICT (attendee_id, community_id) DO NOTHING;
 
     -- ------------------------------------------------------------------------
-    -- Link to event idempotently. v_was_inserted tells the caller whether the
-    -- person was already checked in for this event (true = newly inserted,
-    -- false = was already there).
+    -- Insert (or update) event_attendee with the per-event interesting_fact.
+    -- DO UPDATE lets a returning user fix a typo on their fact for this
+    -- event. xmax = 0 distinguishes "row was inserted" from "row was
+    -- updated" so we can return already_checked_in accurately.
     -- ------------------------------------------------------------------------
-    WITH inserted AS (
-        INSERT INTO event_attendee (event_id, attendee_id)
-        VALUES (p_event_id, v_attendee_id)
-        ON CONFLICT (event_id, attendee_id) DO NOTHING
-        RETURNING 1
+    WITH upserted AS (
+        INSERT INTO event_attendee (event_id, attendee_id, interesting_fact)
+        VALUES (p_event_id, v_attendee_id, v_interesting_fact)
+        ON CONFLICT (event_id, attendee_id) DO UPDATE
+            SET interesting_fact = EXCLUDED.interesting_fact
+        RETURNING (xmax = 0) AS was_inserted
     )
-    SELECT EXISTS (SELECT 1 FROM inserted) INTO v_was_inserted;
+    SELECT was_inserted INTO v_was_inserted FROM upserted;
 
     RETURN jsonb_build_object(
         'success',            true,
