@@ -239,15 +239,15 @@ Lock down Data API access via a SECURITY DEFINER check-in function and restructu
 | F111 | Update database.ts and types.ts | Rewrite checkInAttendee to call RPC, delete now-unused helpers, drop community_id from Attendee type | High | 🟢 Completed |
 | F112 | Update latest-schema.sql | Reflect new attendee/community_attendee structure and tightened grants | Medium | 🟢 Completed |
 
-## v1.5.0-per-event-interesting-fact - 🔴 Not Started
+## v1.5.0-per-event-interesting-fact - 🟢 Completed
 Move `interesting_fact` from the global `attendee` row to the per-event `event_attendee` link so each check-in captures the fact the person wanted to share at that specific event.
 
 | ID  | Feature                 | Description                              | Priority | Status |
 |-----|-------------------------|------------------------------------------|----------|--------|
-| F113 | Add interesting_fact column to event_attendee | Nullable initially, NOT NULL after backfill | High | 🔴 Not Started |
-| F114 | Backfill event_attendee.interesting_fact | Copy from attendee.interesting_fact joined on attendee_id | High | 🔴 Not Started |
-| F115 | Drop attendee.interesting_fact | Remove the global column after successful backfill (same transaction) | High | 🔴 Not Started |
-| F116 | Update check_in_attendee RPC | Write fact to event_attendee instead of attendee; ON CONFLICT DO UPDATE on event_attendee so re-submits can fix the fact; use xmax trick to preserve already_checked_in return value | High | 🔴 Not Started |
-| F117 | Rollback migration | Companion script restoring attendee.interesting_fact, the old function body, and removing event_attendee.interesting_fact | Medium | 🔴 Not Started |
-| F118 | Update TypeScript types | Drop interesting_fact from Attendee interface and isAttendee guard; add interesting_fact to EventAttendee interface | High | 🔴 Not Started |
-| F119 | Update latest-schema.sql | Reflect new event_attendee schema and stripped-down attendee schema | Medium | 🔴 Not Started |
+| F113 | Add interesting_fact column to event_attendee | Nullable initially, NOT NULL after backfill | High | 🟢 Completed |
+| F114 | Backfill event_attendee.interesting_fact | Copy from attendee.interesting_fact joined on attendee_id | High | 🟢 Completed |
+| F115 | Drop attendee.interesting_fact | Remove the global column after successful backfill (same transaction) | High | 🟢 Completed |
+| F116 | Update check_in_attendee RPC | Write fact to event_attendee instead of attendee; ON CONFLICT DO UPDATE on event_attendee so re-submits can fix the fact; use xmax trick to preserve already_checked_in return value | High | 🟢 Completed |
+| F117 | Rollback migration | Companion script restoring attendee.interesting_fact, the old function body, and removing event_attendee.interesting_fact | Medium | 🟢 Completed |
+| F118 | Update TypeScript types | Drop interesting_fact from Attendee interface and isAttendee guard; add interesting_fact to EventAttendee interface | High | 🟢 Completed |
+| F119 | Update latest-schema.sql | Reflect new event_attendee schema and stripped-down attendee schema | Medium | 🟢 Completed |

@@ -2,7 +2,7 @@
   "cody-product-builder": {
     "name": "CheckInto",
     "description": "Mobile-first web app for self-service event check-in via community-specific URLs",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "phase": "build",
     "projectPath": "docs",
     "releaseNotesPath": "{{projectRoot}}",

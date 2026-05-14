@@ -3,9 +3,44 @@
 This document lists new features, bug fixes and other changes implemented during a particular build, also known as a version.
 
 ## Table of Contents
+- [v1.5.0-per-event-interesting-fact](#v150-per-event-interesting-fact---2026-05-13)
 - [v1.4.0-secure-and-restructure-attendee](#v140-secure-and-restructure-attendee---2026-05-13)
 - [v1.3.5-donation-link](#v135-donation-link---2026-01-28)
 - [v1.3.4-unified-event-screen](#v134-unified-event-screen---2026-01-28)
+
+---
+
+# v1.5.0-per-event-interesting-fact - 2026-05-13
+
+## Overview
+This release moves the `interesting_fact` field from the global `attendee` row to the per-event `event_attendee` link. Each check-in now records its own fact, scoped to that specific gathering. Previously, the same person checking in at a second event would silently overwrite the fact displayed for every prior event they had attended.
+
+## Key Features
+- **Per-event interesting facts**: The `interesting_fact` column now lives on `event_attendee`, so the same attendee can share different things at different gatherings. Re-submitting within an event still allows fixing a typo — but only that event's value is affected.
+- **Atomic upsert semantics preserved**: The `check_in_attendee()` RPC signature is unchanged. Internally it now uses `INSERT ... ON CONFLICT (event_id, attendee_id) DO UPDATE SET interesting_fact = EXCLUDED.interesting_fact` and the Postgres `xmax = 0` idiom to keep the `already_checked_in` return value accurate.
+
+## Enhancements
+- `attendee` becomes a pure identity table: `id`, `email`, `first_name`, `last_name`, `created_at`, `updated_at`. No profile data lives on the identity row.
+- TypeScript `Attendee` interface drops `interesting_fact`; `EventAttendee` gains it. `AttendeeInput` is redeclared so the RPC payload type still carries the field.
+
+## Bug Fixes
+- Fixed: re-checking in at a second event silently rewrote the fact shown for prior events because the data lived globally. Each event now keeps its own value.
+
+## Breaking Changes
+- `attendee.interesting_fact` column dropped. External scripts or dashboard queries referencing it will break.
+- `event_attendee.interesting_fact` is now `NOT NULL`. Any external code inserting into `event_attendee` directly (the app does not — it goes through the RPC) must supply a value.
+
+## Database Changes
+- New column: `public.event_attendee.interesting_fact text NOT NULL`.
+- Backfill: every existing `event_attendee` row's value seeded from its attendee's prior global fact (237 rows, 0 nulls after backfill).
+- Dropped column: `public.attendee.interesting_fact`.
+- Updated function: `public.check_in_attendee()` body changed; signature and grants unchanged.
+- A rollback migration is shipped alongside (`v1.5.0-per-event-interesting-fact-rollback.sql`). Note: rollback is lossy — per-event divergence collapses back to one fact per attendee (the earliest event_attendee row's value).
+
+## Migration Files
+- `database/migrations/v1.5.0-per-event-interesting-fact.sql`
+- `database/migrations/v1.5.0-per-event-interesting-fact-rollback.sql`
+- `database/functions/check-in-attendee.sql` (canonical function source)
 
 ---
 

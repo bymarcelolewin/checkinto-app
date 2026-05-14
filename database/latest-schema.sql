@@ -1,7 +1,7 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 --
--- Snapshot reflects state after v1.4.0-secure-and-restructure-attendee.
+-- Snapshot reflects state after v1.5.0-per-event-interesting-fact.
 --
 -- Access model (post-v1.4.0):
 --   - anon has NO direct grants on `attendee`, `event_attendee`, or
@@ -13,12 +13,17 @@
 --   - As of 2026-10-30, Supabase no longer auto-grants new public tables
 --     to the Data API roles. Explicit grants are required for any new
 --     table. See database/migrations/CLAUDE.md.
+--
+-- Data model notes (post-v1.5.0):
+--   - `attendee` holds pure identity: id, email, name, timestamps. No
+--     interesting_fact (moved to event_attendee).
+--   - `event_attendee.interesting_fact` is per-check-in: each event records
+--     its own fact for the attendee, independent of other events.
 
 CREATE TABLE public.attendee (
   first_name text NOT NULL,
   last_name text NOT NULL,
   email text NOT NULL UNIQUE,
-  interesting_fact text NOT NULL,
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
@@ -89,6 +94,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.event TO service_role;
 CREATE TABLE public.event_attendee (
   event_id uuid NOT NULL,
   attendee_id uuid NOT NULL,
+  interesting_fact text NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   raffle_winner boolean NOT NULL DEFAULT false,
   raffle_round integer CHECK (raffle_round IS NULL OR raffle_round > 0),

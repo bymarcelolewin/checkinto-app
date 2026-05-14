@@ -36,20 +36,20 @@ Update TypeScript types to match the new schema. No runtime behavior change.
 |-----|------------------|-----------------------------------------|--------------|--------|-------------|
 | T07 | Update types.ts | Drop `interesting_fact` from `Attendee` interface; remove its check from `isAttendee` type guard at line 257; add `interesting_fact: string` to `EventAttendee` interface; explicitly redeclare `AttendeeInput` so it keeps `interesting_fact` (no longer auto-derived from `Attendee` via Omit). | T04 | 🟢 Completed | AGENT |
 | T08 | Type-check | Run `npm run check`. Confirm no new errors introduced beyond the pre-existing tsconfig baseline noted in v1.4.0 retrospective. | T07 | 🟢 Completed | AGENT |
-| T09 | Manual smoke test in production | USER deploys via git push, then opens a live event URL, completes a check-in end-to-end. Verifies (a) check-in still succeeds with no UI change, (b) event_attendee row now has the interesting_fact value, (c) re-submitting with a different fact for the same event updates only that event's fact (not other events the person has attended). | T08 | 🔴 Not Started | USER |
+| T09 | Manual smoke test in production | USER deploys via git push, then opens a live event URL, completes a check-in end-to-end. Verifies (a) check-in still succeeds with no UI change, (b) event_attendee row now has the interesting_fact value, (c) re-submitting with a different fact for the same event updates only that event's fact (not other events the person has attended). All passed. | T08 | 🟢 Completed | USER |
 
 ## Phase 4: Documentation
 
 | ID  | Task             | Description                             | Dependencies | Status | Assigned To |
 |-----|------------------|-----------------------------------------|--------------|--------|-------------|
-| T10 | Update latest-schema.sql | Move `interesting_fact` from `attendee` to `event_attendee` block; refresh header comment if needed. | T09 | 🔴 Not Started | AGENT |
-| T11 | Mark v1.5.0 complete in backlog | Update `docs/build/feature-backlog.md`: set v1.5.0 status to 🟢 Completed and all 7 feature rows (F113–F119) to 🟢 Completed. | T10 | 🔴 Not Started | AGENT |
+| T10 | Update latest-schema.sql | Move `interesting_fact` from `attendee` to `event_attendee` block; refresh header comment if needed. | T09 | 🟢 Completed | AGENT |
+| T11 | Mark v1.5.0 complete in backlog | Update `docs/build/feature-backlog.md`: set v1.5.0 status to 🟢 Completed and all 7 feature rows (F113–F119) to 🟢 Completed. | T10 | 🟢 Completed | AGENT |
 
 ## Phase 5: Wrap-Up
 
 | ID  | Task             | Description                             | Dependencies | Status | Assigned To |
 |-----|------------------|-----------------------------------------|--------------|--------|-------------|
-| T12 | Write retrospective | Create `docs/build/v1.5.0-per-event-interesting-fact/retrospective.md` from template. | T11 | 🔴 Not Started | AGENT |
-| T13 | Update cody.json | Set `version` to `1.5.0` and `updatedAt` to today's date. | T11 | 🔴 Not Started | AGENT |
-| T14 | Update release-notes.md | Add v1.5.0 entry to `release-notes.md` at project root. | T11 | 🔴 Not Started | AGENT |
-| T15 | Commit to git | USER commits all changes with a descriptive message. | T14 | 🔴 Not Started | USER |
+| T12 | Write retrospective | Create `docs/build/v1.5.0-per-event-interesting-fact/retrospective.md` from template. | T11 | 🟢 Completed | AGENT |
+| T13 | Update cody.json | Set `version` to `1.5.0` and `updatedAt` to today's date. | T11 | 🟢 Completed | AGENT |
+| T14 | Update release-notes.md | Add v1.5.0 entry to `release-notes.md` at project root. | T11 | 🟢 Completed | AGENT |
+| T15 | Commit to git | USER commits all changes with a descriptive message. | T14 | 🟢 Completed | USER |
