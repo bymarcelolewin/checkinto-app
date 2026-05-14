@@ -7,6 +7,7 @@ This document lists new features, bug fixes and other changes implemented during
 - [v1.4.0-secure-and-restructure-attendee](#v140-secure-and-restructure-attendee---2026-05-13)
 - [v1.3.5-donation-link](#v135-donation-link---2026-01-28)
 - [v1.3.4-unified-event-screen](#v134-unified-event-screen---2026-01-28)
+- [Older Versions (v1.3.3 and earlier)](#older-versions)
 
 ---
 
@@ -137,3 +138,22 @@ None
 - Removed "Check In Another Person" button - each attendee should use their own device
 - Deleted deprecated WelcomeScreen.svelte and ConfirmationScreen.svelte files
 - Estimated ~400 lines of code reduced through component consolidation
+
+---
+
+# Older Versions
+
+Compact history for releases prior to v1.3.4. For detailed notes on these versions, see the corresponding folders under `docs/build/`.
+
+- **v1.3.3** - Added event-level flag for controlling event details visibility
+- **v1.3.2** - GitHub organization migration to checkinto-io
+- **v1.3.1** - Database schema rename: `group` table → `community` table
+- **v1.3.0** - Complete multi-tenant architecture with data isolation and secure routing
+- **v1.2.0** - CSS consolidation and styling improvements
+- **v1.1.0** - Multi-tenant image folder restructure with community-based organization
+- **v1.0.0** - Production deployment with custom domain and full feature set
+- **v0.8.0** - Real-time raffle system implementation
+- **v0.7.0** - Community host integration and talent management
+- **v0.6.0** - Persistent state management for confirmation screens
+- **v0.5.0** - Database schema normalization and optimization
+- **v0.1.0–v0.4.0** - Core functionality development and polish

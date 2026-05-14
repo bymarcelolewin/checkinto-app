@@ -1,6 +1,7 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.3.5-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Release Notes](https://img.shields.io/badge/release_notes-view-green.svg)](release-notes.md)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
 A mobile-first web application that enables seamless self-service check-in for in-person community event attendees with real-time raffle functionality and full multi-tenant support.
@@ -40,9 +41,10 @@ This application streamlines the check-in process for community events by provid
 - Admin-triggered winner selection via Supabase Edge Functions
 
 ### ✅ Multi-Tenant Architecture
-- **Complete data isolation** - Each community maintains separate attendees, venues, and talent
 - **Subdomain-based routing** - Secure event access via `{communityname}.checkinto.io/{eventId}`
-- **Cross-community flexibility** - Same user can participate in multiple communities independently
+- **Per-community ownership** - Each community owns its own events, venues, and talent records
+- **Shared attendee identity** - One global identity per email; a `community_attendee` join table tracks which communities each person has interacted with
+- **Per-event context** - Each check-in stores its own "interesting fact" scoped to that specific gathering
 - **Scalable design** - Support for unlimited community organizers without conflicts
 
 ### ✅ Donation Support
@@ -131,19 +133,23 @@ static/images/communities/ibuildwithaimeetup/
 
 ## Multi-Tenant Support Details
 
-### Data Isolation
-- **Complete tenant separation** - Each community maintains its own attendees, venues, and talent records
-- **Cross-community user support** - Same email address can register for events across different communities
-- **Secure routing** - Events are validated against both event ID and community profile name
-- **Database-level isolation** - All core tables include `community_id` foreign key constraints
+### Data Model
+- **Per-community ownership** - Each community owns its own `event`, `venue`, and `talent` records via `community_id` foreign keys
+- **Global attendee identity** - The `attendee` table holds one row per email across the entire system (`id`, `email`, `first_name`, `last_name`, timestamps). No per-community attendee duplication.
+- **Many-to-many community membership** - The `community_attendee` join table records every (attendee, community) pair, populated automatically the first time someone checks in to one of a community's events
+- **Per-event check-in details** - The `event_attendee` join table links attendees to events and stores the per-event `interesting_fact` shared at that specific gathering. Same person at two different events records two different facts.
+- **Anon access lockdown** - Anonymous clients (the browser using the Supabase anon key) have **no direct grants** on `attendee`, `event_attendee`, or `community_attendee`. All check-in writes go through the `check_in_attendee()` SECURITY DEFINER Postgres function, which validates input server-side.
+- **Secure routing** - Events are validated against both event ID and community profile name; communities cannot access each other's events even with identical event IDs
 
 ### Real-World Example
 A user with email `john@example.com` can:
-1. Register for `ibuildwithaimeetup.checkinto.io/082025` as "John Smith"
-2. Register for `seattle.checkinto.io/082025` as "J. Smith" 
-3. Register for `vancouver.checkinto.io/082025` as "Johnny"
+1. Register for `ibuildwithaimeetup.checkinto.io/082025` with the fact "Building an AI agent this month."
+2. Later register for `seattle.checkinto.io/082025` with the fact "Visiting from Vancouver."
+3. Later register for `vancouver.checkinto.io/082025` with the fact "Hosting a meetup next month."
 
-Each community sees them as separate attendees with their own check-in history, while the system maintains proper isolation and prevents conflicts.
+There is exactly **one** John Smith row in the `attendee` table. The `community_attendee` table records his membership in all three communities. Each event records his fact for that gathering independently — the iBuildWithAI event still displays "Building an AI agent this month" even after he checks in to the Seattle and Vancouver events with different facts.
+
+His name (e.g., "John Smith") is global identity — typing a different name at a later check-in updates the single attendee row across all communities. Per-community display names are not currently supported; they would be a future feature addition.
 
 ## License
 
@@ -154,21 +160,4 @@ This software is licensed under a **Commercial License**.
 
 The source code is publicly available for transparency and educational purposes only. See the [LICENSE](LICENSE) file for complete terms and conditions.
 
-For commercial licensing inquiries: marcelo@redpillbluepillstudios.com
-
-## Version History
-
-- **v1.3.5** - Added optional donation box with database-driven message and link
-- **v1.3.4** - Unified event screen combining welcome and confirmation into single adaptive screen
-- **v1.3.3** - Added event-level flag for controlling event details visibility
-- **v1.3.2** - GitHub organization migration to checkinto-io
-- **v1.3.1** - DB Schema update for group table to "community" table
-- **v1.3.0** - Complete multi-tenant architecture with data isolation and secure routing
-- **v1.2.0** - CSS consolidation and styling improvements
-- **v1.1.0** - Multi-tenant image folder restructure with community-based organization
-- **v1.0.0** - Production deployment with custom domain and full feature set
-- **v0.8.0** - Real-time raffle system implementation
-- **v0.7.0** - Community host integration and talent management
-- **v0.6.0** - Persistent state management for confirmation screens
-- **v0.5.0** - Database schema normalization and optimization
-- **v0.1.0-v0.4.0** - Core functionality development and polish
+For commercial licensing inquiries: marcelo@ibuildwith.ai
