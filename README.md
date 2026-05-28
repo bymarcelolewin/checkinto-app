@@ -1,6 +1,6 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
 [![Release Notes](https://img.shields.io/badge/release_notes-view-green.svg)](release-notes.md)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
@@ -51,6 +51,13 @@ This application streamlines the check-in process for community events by provid
 - Optional donation box with customizable message
 - Database-driven content (no code changes needed)
 - Conditional display - only shows when donation link is configured
+
+### ✅ Checked-In Message (v1.6.1)
+- Optional per-event message that surfaces after an attendee checks in (e.g., "Get your buildathon document now!" with embedded link)
+- New nullable `checkedin_message` column on the `event` table — set it in Supabase, leave it NULL to hide the card
+- Supports inline HTML (`<a href>`, line breaks) using the same trust model as `welcome_message`
+- Whitespace-only values are treated as empty (the card hides automatically)
+- Sits between the "You're checked in!" hero and the polls inbox, styled to match existing cards
 
 ### ✅ Event Voting (v1.6.0)
 - Admin-defined polls per event (managed directly in Supabase — no admin UI yet)

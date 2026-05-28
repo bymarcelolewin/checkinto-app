@@ -3,12 +3,47 @@
 This document lists new features, bug fixes and other changes implemented during a particular build, also known as a version.
 
 ## Table of Contents
+- [v1.6.1-checkedin-message](#v161-checkedin-message---2026-05-27)
 - [v1.6.0-event-voting](#v160-event-voting---2026-05-27)
 - [v1.5.0-per-event-interesting-fact](#v150-per-event-interesting-fact---2026-05-13)
 - [v1.4.0-secure-and-restructure-attendee](#v140-secure-and-restructure-attendee---2026-05-13)
 - [v1.3.5-donation-link](#v135-donation-link---2026-01-28)
 - [v1.3.4-unified-event-screen](#v134-unified-event-screen---2026-01-28)
 - [Older Versions (v1.3.3 and earlier)](#older-versions)
+
+---
+
+# v1.6.1-checkedin-message - 2026-05-27
+
+## Overview
+This release adds an optional per-event `checkedin_message` — a short admin-written message that surfaces after an attendee checks in. Renders in a gray card between the "You're checked in!" hero and the polls inbox. Supports inline HTML (notably `<a href>` links) so admins can embed downloadable resources, schedule links, or any time-sensitive in-event content directly. NULL or whitespace-only values hide the card automatically.
+
+## Key Features
+- **Per-event checked-in message**: new optional `event.checkedin_message` column. Set it in Supabase, leave it NULL, or change it mid-event. The card renders only when the attendee is checked in AND the message has non-whitespace content.
+- **Inline HTML support**: rendered with the same `formatLineBreaks` + `{@html}` pattern as `welcome_message`. Admins can drop in `<a href="…">label</a>` and line breaks (`\n` → `<br>`) without any new fields or escaping.
+- **Whitespace-tolerant hiding**: a stray space or accidental enter in Supabase Studio is treated as empty — no invisible card eating layout space.
+- **Independent of `show_event_details`**: this control is separate from the event-details visibility flag. Admins can set both, neither, or one.
+
+## Database Changes
+- **New column**: `public.event.checkedin_message text` (nullable, no default, no length constraint).
+- **Migration**: `database/migrations/v1.6.1-checkedin-message.sql` — single `ALTER TABLE ... ADD COLUMN` in a transaction.
+- **Rollback**: `database/migrations/v1.6.1-checkedin-message-rollback.sql` — drops the column. **LOSSY** if any populated values exist.
+- No new functions, RLS changes, or grants required. The column flows through the existing `SELECT *` event query for free.
+
+## Frontend Changes
+- `Event` TypeScript interface gains `checkedin_message: string | null`.
+- `EventScreen.svelte` gets a new card block at the top of `event-main`, guarded by `{#if isCheckedIn && event.checkedin_message?.trim()}`. Styled to match the existing gray-card pattern (donation, polls inbox); inline links inherit the green accent via `:global(a)` so styles reach `{@html}`-injected anchors.
+
+## Behavioral Notes
+- **Mid-event edits don't push to live users** — same as the v1.6.0 polls feature, attendees with the page open see the old (or no) message until they refresh.
+- **HTML is rendered verbatim** — typing `<href=…>` instead of `<a href=…>` will silently render nothing (the browser drops malformed tags). Write valid HTML.
+
+## Breaking Changes
+- None. Existing events with NULL `checkedin_message` behave exactly as before.
+
+## Migration Files
+- `database/migrations/v1.6.1-checkedin-message.sql`
+- `database/migrations/v1.6.1-checkedin-message-rollback.sql`
 
 ---
 

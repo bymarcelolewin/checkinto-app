@@ -1,7 +1,7 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 --
--- Snapshot reflects state after v1.6.0-event-voting.
+-- Snapshot reflects state after v1.6.1-checkedin-message.
 --
 -- Access model (post-v1.4.0):
 --   - anon has NO direct grants on `attendee`, `event_attendee`,
@@ -88,6 +88,7 @@ CREATE TABLE public.event (
   url_id text NOT NULL,
   title text NOT NULL,
   welcome_message text NOT NULL,
+  checkedin_message text,
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   active boolean NOT NULL DEFAULT true,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
