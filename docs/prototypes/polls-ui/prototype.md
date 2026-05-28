@@ -59,7 +59,7 @@ _The **USER's** judgment about the prototype: what works, what does not, what to
 
 **Likes / what to keep:**
 - The popup + inbox card model end-to-end. "I'm good with the way it looks and works. I like everything as is. I want to implement it exactly as we finalized here."
-- Auto-popup on load for the first un-voted open poll — surfaces the action without burying it.
+- ~~Auto-popup on load for the first un-voted open poll — surfaces the action without burying it.~~ **Reversed in production:** felt intrusive when the screen first appeared. The red "Vote" pill on the inbox row is enough call-to-action. Removed post-deploy; inbox + tap-to-open is the only entry point.
 - Single-word red "Vote" pill on the inbox row for un-voted polls — clearer call to action than "Vote now".
 - X-only close affordance on the popup; no need for a bottom Close button.
 - Inbox card placement between "You're checked in!" hero and the donation box.

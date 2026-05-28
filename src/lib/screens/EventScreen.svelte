@@ -6,7 +6,6 @@
 	import { navigationActions } from '$lib/stores';
 	import { fetchRaffleWinners, getOrdinal, isWinner } from '$lib/utils/raffle';
 	import { getConfirmationState, hasConfirmationState, clearConfirmationState } from '$lib/utils/storage';
-	import { pickAutoPopupPoll, markPollSeen, clearSeenPollIds } from '$lib/utils/polls';
 	import { getImagePath, IMAGE_CATEGORIES } from '$lib/utils/imagePaths';
 	import { DatabaseService } from '$lib/database';
 	import type { Event, Poll, RaffleWinner } from '$lib/types';
@@ -48,11 +47,10 @@
 				clearInterval(pollingInterval);
 				pollingInterval = null;
 			}
-			// Reset polls state and auto-popup history for this event
+			// Reset polls state
 			currentAttendeeId = '';
 			polls = [];
 			openPollId = null;
-			if (event?.id) clearSeenPollIds(event.id);
 		}
 	};
 
@@ -82,21 +80,11 @@
 				// in localStorage; those attendees see no polls until they
 				// re-check-in. Acceptable graceful degradation.
 				if (event?.id && currentAttendeeId) {
-					loadPollsAndMaybeAutoPopup();
+					refreshPolls();
 				}
 			}
 		}
 	});
-
-	const loadPollsAndMaybeAutoPopup = async () => {
-		if (!event?.id || !currentAttendeeId) return;
-		polls = await DatabaseService.getPollsForEvent(event.id, currentAttendeeId);
-		const target = pickAutoPopupPoll(polls, event.id);
-		if (target) {
-			markPollSeen(event.id, target.id);
-			openPollId = target.id;
-		}
-	};
 
 	const refreshPolls = async () => {
 		if (!event?.id || !currentAttendeeId) return;
