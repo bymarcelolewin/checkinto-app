@@ -3,11 +3,62 @@
 This document lists new features, bug fixes and other changes implemented during a particular build, also known as a version.
 
 ## Table of Contents
+- [v1.6.0-event-voting](#v160-event-voting---2026-05-27)
 - [v1.5.0-per-event-interesting-fact](#v150-per-event-interesting-fact---2026-05-13)
 - [v1.4.0-secure-and-restructure-attendee](#v140-secure-and-restructure-attendee---2026-05-13)
 - [v1.3.5-donation-link](#v135-donation-link---2026-01-28)
 - [v1.3.4-unified-event-screen](#v134-unified-event-screen---2026-01-28)
 - [Older Versions (v1.3.3 and earlier)](#older-versions)
+
+---
+
+# v1.6.0-event-voting - 2026-05-27
+
+## Overview
+This release adds per-event polls. After an attendee checks in, a "Polls" inbox card surfaces on the unified main screen between the "You're checked in!" hero and the donation box, listing every active poll for the event with a state-driven pill — red **Vote** for un-voted polls, green **Voted** once cast, amber **Results** when the admin closes the poll. Tapping any row opens a modal popup with the ballot, the voted view (with a "Change your vote" link), or the ranked winners. Poll administration happens directly in Supabase via SQL; no admin UI ships in this release.
+
+Shipped live and validated at the iBuildWithAI Buildathon #1 — 5 hackathon entrants, votes cast on attendees' phones, admin closed the poll and revealed winners in everyone's popup in real time (well, on next refresh — see below).
+
+## Key Features
+- **Polls inbox card** (`PollsInbox.svelte`): one row per active poll for the event, sorted by `display_order, created_at`. Each row shows poll title, a state-based subtitle hint, and a right-side pill.
+- **Modal popup** (`PollPopup.svelte`): single component hosts every per-poll state — ballot (radio list + Vote button), voted view (custom thanks message + prior pick highlighted + "Change your vote" link), ranked results (with per-rank labels, tie suffixes, "your pick" badge, and an optional vote-count display), no-votes state, and an "items coming soon" placeholder. Closes via X, dim-overlay click, or Escape.
+- **One vote per attendee per poll**, enforced by the `poll_vote(poll_id, attendee_id)` composite PK. Change-vote is just a re-call to `submit_vote` — `ON CONFLICT DO UPDATE` replaces the prior choice.
+- **`active` vs `status` separation**: `poll.active` controls visibility (admin sets `false` while drafting items and labels, `true` to publish). `poll.status` (`'open'` | `'closed'`) controls whether attendees see the ballot or the ranked results. The two axes are independent — `active=false` hides the poll regardless of `status`.
+- **Custom per-rank winner labels** (optional): a `poll_winner_label` table maps `(poll_id, rank)` → display label. Multiple ranks may share a label (e.g., ranks 4 and 5 both "Honorable Mention"). Missing ranks fall back to client-rendered ordinals ("1st Place", "2nd Place", etc.).
+- **Competition-ranking ties**: two-way tie for 2nd both show "2nd Place — Tie" and the next rank skips to 4th. Items at the cutoff are all included even if ties push the count past `top_n_winners`.
+- **Items with zero votes are excluded from results** — a "winner" implies at least one vote.
+
+## Database Changes
+- **New table**: `public.poll` — per-event poll. Columns: `event_id`, `community_id` (denormalized from event for future RLS), `title`, `active boolean DEFAULT false`, `status text CHECK IN ('open','closed') DEFAULT 'open'`, `top_n_winners`, `show_vote_count`, three customizable message fields, `display_order`, timestamps.
+- **New table**: `public.poll_item` — ballot choices (FK to poll, ON DELETE CASCADE).
+- **New table**: `public.poll_winner_label` — optional per-rank label overrides (composite PK `(poll_id, rank)`).
+- **New table**: `public.poll_vote` — one row per (poll, attendee) (composite PK enforces single-vote).
+- **New function**: `submit_vote(p_poll_id, p_poll_item_id, p_attendee_id)` — `SECURITY DEFINER`. Validates poll is active and open, item belongs to poll, attendee is checked into the event. Upserts on the composite PK.
+- **New function**: `get_polls_for_event(p_event_id, p_attendee_id)` — `SECURITY DEFINER`. Validates caller is checked in. Returns active polls with items, attendee's vote, winner labels, and (for closed polls) ranked results with `vote_count`, `rank`, and `is_my_vote` per item. Zero-vote items excluded from results.
+- **Access model**: anon has zero direct grants on any of the four new tables; RLS enabled on all four. Every read goes through `get_polls_for_event`; every write through `submit_vote`. Both functions grant `EXECUTE` to `anon` and `authenticated`.
+- A rollback migration is shipped alongside (`v1.6.0-event-voting-rollback.sql`). It drops the two functions and the four tables (cascade-drops all poll data).
+
+## Frontend Changes
+- **`attendee_id` now persisted in `ConfirmationState`**. The existing v0.6.0 confirmation state only stored `attendeeEmail`. v1.6.0 extends it with `attendeeId` so the polls feature can identify the voter to the RPCs. Plumbed through `CheckInResponse`, `DatabaseService.checkInAttendee`, `storeConfirmationState`, and `navigationActions.completeCheckin`. Pre-v1.6.0 check-ins (email-only state) degrade gracefully — polls do not render until the attendee re-checks-in.
+- **Polls inbox + popup mounted in `EventScreen.svelte`** between the "You're checked in!" hero and the donation card. Fetches on mount and after each vote (no realtime polling).
+- **`Clear check-in`** still works as before — it wipes localStorage and resets local state. DB votes stay (matches the established raffle-winner pattern).
+
+## Behavioral Notes
+- **No realtime updates while a user has the page open.** If you edit a poll mid-event (change a name, add an item, close voting), users with the page already open won't see the change until they refresh or cast a vote. Tell attendees to refresh after any mid-event edit.
+- **Deleting a `poll_item` someone already voted for cascades the vote.** If you delete a row that has votes, those votes vanish silently. Prefer renaming in place.
+
+## Breaking Changes
+- None for existing flows. Check-in, raffle, and event details work exactly as in v1.5.0.
+
+## Migration Files
+- `database/migrations/v1.6.0-event-voting.sql`
+- `database/migrations/v1.6.0-event-voting-rollback.sql`
+- `database/functions/submit-vote.sql` (canonical function source)
+- `database/functions/get-polls-for-event.sql` (canonical function source)
+
+## Known Followups (v1.6.1 patch list)
+- Convert `poll.status` from `text + CHECK` to `voting_open boolean` for consistency with `poll.active`.
+- Optional `clear_vote` RPC + "Clear your vote" link in the popup for the rare opt-out case.
 
 ---
 

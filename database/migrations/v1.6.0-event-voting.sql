@@ -323,7 +323,7 @@ BEGIN
                         WHERE pi.poll_id = p.id
                         GROUP BY pi.id, pi.name, pi.display_order
                     ) r
-                    WHERE r.rank <= p.top_n_winners
+                    WHERE r.rank <= p.top_n_winners AND r.vote_count > 0
                 ), '[]'::jsonb)
                 ELSE NULL END
             ) AS poll_obj

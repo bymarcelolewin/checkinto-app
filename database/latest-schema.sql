@@ -1,13 +1,14 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 --
--- Snapshot reflects state after v1.5.0-per-event-interesting-fact.
+-- Snapshot reflects state after v1.6.0-event-voting.
 --
 -- Access model (post-v1.4.0):
---   - anon has NO direct grants on `attendee`, `event_attendee`, or
---     `community_attendee`. Anonymous check-in goes through the
---     `check_in_attendee()` SECURITY DEFINER function (see
---     database/functions/check-in-attendee.sql).
+--   - anon has NO direct grants on `attendee`, `event_attendee`,
+--     `community_attendee`, `poll`, `poll_item`, `poll_winner_label`, or
+--     `poll_vote`. Anonymous check-in goes through the
+--     `check_in_attendee()` SECURITY DEFINER function. Poll reads go
+--     through `get_polls_for_event()`; poll writes through `submit_vote()`.
 --   - anon retains direct SELECT on the four read-only tables: `event`,
 --     `community`, `talent`, `venue`.
 --   - As of 2026-10-30, Supabase no longer auto-grants new public tables
@@ -19,6 +20,24 @@
 --     interesting_fact (moved to event_attendee).
 --   - `event_attendee.interesting_fact` is per-check-in: each event records
 --     its own fact for the attendee, independent of other events.
+--
+-- Data model notes (post-v1.6.0):
+--   - `poll` is per-event. `active` controls visibility to attendees
+--     (admin uses active=false while drafting items + labels); `status`
+--     (open|closed) controls whether attendees see the ballot or the
+--     ranked results. The two flags are independent: active=false hides
+--     the poll regardless of status.
+--   - `community_id` on poll is denormalized from event.community_id; the
+--     admin INSERT path must keep them consistent. The column exists so
+--     future community-admin RLS doesn't have to JOIN through event.
+--   - `poll_vote(poll_id, attendee_id)` composite PK enforces one vote
+--     per attendee per poll. submit_vote() upserts on this PK so
+--     change-vote is just a re-call.
+--   - `poll_winner_label(poll_id, rank)` is optional per-rank label
+--     overrides for the results display; missing ranks fall back to
+--     client-rendered ordinal defaults ("1st Place", etc.).
+--   - Closed-poll results exclude items with zero votes — a "winner"
+--     implies at least one vote.
 
 CREATE TABLE public.attendee (
   first_name text NOT NULL,
@@ -141,3 +160,74 @@ CREATE TABLE public.venue (
 GRANT SELECT ON public.venue TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.venue TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.venue TO service_role;
+
+CREATE TABLE public.poll (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  event_id uuid NOT NULL,
+  community_id uuid NOT NULL,
+  title text NOT NULL,
+  active boolean NOT NULL DEFAULT false,
+  status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+  top_n_winners integer NOT NULL DEFAULT 3 CHECK (top_n_winners > 0),
+  show_vote_count boolean NOT NULL DEFAULT false,
+  thanks_message text NOT NULL DEFAULT 'Thanks for voting. Stay tuned for the winners.',
+  closed_message text NOT NULL DEFAULT 'Voting has closed.',
+  no_votes_message text NOT NULL DEFAULT 'No votes were recorded for this poll.',
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT poll_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_poll_event FOREIGN KEY (event_id) REFERENCES public.event(id) ON DELETE CASCADE,
+  CONSTRAINT fk_poll_community FOREIGN KEY (community_id) REFERENCES public.community(id)
+);
+CREATE INDEX idx_poll_event_id ON public.poll(event_id);
+CREATE INDEX idx_poll_community_id ON public.poll(community_id);
+ALTER TABLE public.poll ENABLE ROW LEVEL SECURITY;
+-- No grants for anon. Reads go through get_polls_for_event() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll TO service_role;
+
+CREATE TABLE public.poll_item (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  poll_id uuid NOT NULL,
+  name text NOT NULL,
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT poll_item_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_poll_item_poll FOREIGN KEY (poll_id) REFERENCES public.poll(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_poll_item_poll_id ON public.poll_item(poll_id);
+ALTER TABLE public.poll_item ENABLE ROW LEVEL SECURITY;
+-- No grants for anon. Reads go through get_polls_for_event() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_item TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_item TO service_role;
+
+CREATE TABLE public.poll_winner_label (
+  poll_id uuid NOT NULL,
+  rank integer NOT NULL CHECK (rank > 0),
+  label text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT poll_winner_label_pkey PRIMARY KEY (poll_id, rank),
+  CONSTRAINT fk_poll_winner_label_poll FOREIGN KEY (poll_id) REFERENCES public.poll(id) ON DELETE CASCADE
+);
+ALTER TABLE public.poll_winner_label ENABLE ROW LEVEL SECURITY;
+-- No grants for anon. Reads go through get_polls_for_event() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_winner_label TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_winner_label TO service_role;
+
+CREATE TABLE public.poll_vote (
+  poll_id uuid NOT NULL,
+  attendee_id uuid NOT NULL,
+  poll_item_id uuid NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT poll_vote_pkey PRIMARY KEY (poll_id, attendee_id),
+  CONSTRAINT fk_poll_vote_poll FOREIGN KEY (poll_id) REFERENCES public.poll(id) ON DELETE CASCADE,
+  CONSTRAINT fk_poll_vote_attendee FOREIGN KEY (attendee_id) REFERENCES public.attendee(id),
+  CONSTRAINT fk_poll_vote_item FOREIGN KEY (poll_item_id) REFERENCES public.poll_item(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_poll_vote_item_id ON public.poll_vote(poll_item_id);
+ALTER TABLE public.poll_vote ENABLE ROW LEVEL SECURITY;
+-- No grants for anon. Writes go through submit_vote() RPC; reads through get_polls_for_event() RPC.
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_vote TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.poll_vote TO service_role;

@@ -1,6 +1,6 @@
 # CheckInto App
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](https://github.com/bymarcelolewin/checkinto-app)
 [![Release Notes](https://img.shields.io/badge/release_notes-view-green.svg)](release-notes.md)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
@@ -51,6 +51,15 @@ This application streamlines the check-in process for community events by provid
 - Optional donation box with customizable message
 - Database-driven content (no code changes needed)
 - Conditional display - only shows when donation link is configured
+
+### ✅ Event Voting (v1.6.0)
+- Admin-defined polls per event (managed directly in Supabase — no admin UI yet)
+- Polls inbox card surfaces between "You're checked in!" and the donation box, with a red **Vote** pill on un-voted polls, green **Voted** once cast, and amber **Results** when closed
+- Tap any inbox row to open a modal popup with the ballot, your "Voted" state (with the option to change your vote), or the ranked winners
+- One vote per attendee per poll; change-vote is supported any time before the poll closes
+- Ranked-results view honors a per-poll `top_n_winners` setting, uses competition ranking for ties (e.g., two-way tie for 2nd → both show "2nd Place — Tie", next item is 4th), supports optional custom rank labels (e.g., "Grand Prize", "Honorable Mention") and an optional `show_vote_count` toggle
+- Items with zero votes are excluded from results — a "winner" implies at least one vote
+- All poll reads/writes are routed through `SECURITY DEFINER` functions (`get_polls_for_event`, `submit_vote`); raw poll/vote tables are never exposed to anon
 
 ## Tech Stack
 

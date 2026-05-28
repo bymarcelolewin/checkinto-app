@@ -17,6 +17,7 @@ This document lists features and enhancements derived from the plan. It is a liv
 | B002 | Analytics & Reporting | Attendance analytics and export functionality | Medium | 🔴 Not Started |
 | B003 | Multi-language Support | Support for multiple languages in UI | Low | 🔴 Not Started |
 | B004 | Enhanced Security | Rate limiting, CAPTCHA, content moderation | Medium | 🔴 Not Started |
+| B005 | Ranked Voting Option | Add ranked voting to polls. As an option. | Medium | 🔴 Not Started |
 
 ## v0.1.0-foundation - 🟢 Completed
 Initial project setup and basic infrastructure to establish development environment and core architecture.
@@ -239,31 +240,31 @@ Lock down Data API access via a SECURITY DEFINER check-in function and restructu
 | F111 | Update database.ts and types.ts | Rewrite checkInAttendee to call RPC, delete now-unused helpers, drop community_id from Attendee type | High | 🟢 Completed |
 | F112 | Update latest-schema.sql | Reflect new attendee/community_attendee structure and tightened grants | Medium | 🟢 Completed |
 
-## v1.6.0-event-voting - 🔴 Not Started
+## v1.6.0-event-voting - 🟢 Completed
 Add a per-event voting feature so checked-in attendees can vote on admin-defined items (e.g., hackathon projects) and see ranked winners once the admin closes the poll. Backend-only management (no admin UI yet — polls/items/state managed directly in Supabase). One vote per attendee per poll; attendees may change their vote while the poll is open. Multiple polls per event are supported; the final layout for multi-poll display and the persistent "Polls" history view will be designed via `:cody prototype` before finalizing UI scope.
 
 | ID  | Feature                 | Description                              | Priority | Status |
 |-----|-------------------------|------------------------------------------|----------|--------|
-| F120 | Poll Schema | Create `poll`, `poll_item`, `poll_vote` tables with FKs to event/attendee/poll_item; status flag (open/closed), title, top_n_winners, show_vote_count flag, customizable thanks/closed/no-votes messages on `poll` | High | 🔴 Not Started |
-| F121 | One-Vote-Per-Attendee Constraint | Unique constraint on `poll_vote(poll_id, attendee_id)` to enforce single vote per attendee per poll | High | 🔴 Not Started |
-| F122 | submit_vote RPC | SECURITY DEFINER function: validates poll is open and attendee is checked into the event, upserts vote on (poll_id, attendee_id) so attendees can change their vote until close | High | 🔴 Not Started |
-| F123 | Poll Results Query | Function/view returning ranked results using competition ranking for ties (e.g., two-way tie for 2nd both show "2nd Place — Tie", next item is 4th); honors per-poll top_n_winners; returns all items if N exceeds item count; includes `is_my_vote` per item and the poll's `winner_labels` map | High | 🔴 Not Started |
-| F124 | RLS & Grants | RLS policies allowing anon to read polls/items/results for events they're checked into; no direct writes — function-only path; revoke direct anon writes on poll_vote | High | 🔴 Not Started |
-| F125 | Rollback Migration | Companion script to drop new tables/function and restore prior schema | Medium | 🔴 Not Started |
-| F126 | TypeScript Interfaces | Add Poll, PollItem, PollVote, PollResult interfaces and update database types | High | 🔴 Not Started |
-| F127 | Database Service Methods | Frontend service methods to fetch open polls for an event, cast/change a vote via RPC, fetch closed-poll results | High | 🔴 Not Started |
-| F128 | Ballot UI (in popup) | Inside the popup modal: custom poll title, single-select radio list of items, `[Vote]` button. Visible only to checked-in attendees | High | 🔴 Not Started |
-| F129 | Post-Vote Thank-You State (in popup) | After submission inside the popup, replace ballot with the per-poll customizable `thanks_message` and a list of items with the prior pick highlighted | High | 🔴 Not Started |
-| F130 | Change-Vote Capability (in popup) | Allow attendees to re-open the ballot via a "Change your vote" link any time before the poll closes; prior selection pre-selected | Medium | 🔴 Not Started |
-| F131 | Closed-Poll Results Display (in popup) | When the inbox row is tapped for a closed poll, show ranked winners (1st/2nd/3rd...) honoring `top_n_winners`, with tie handling, optional vote counts (per `show_vote_count` flag), per-rank labels from `poll_winner_label` (default `"Nth Place"` for unlabeled ranks), and a "your pick" badge next to the item the attendee voted for | High | 🔴 Not Started |
+| F120 | Poll Schema | Create `poll`, `poll_item`, `poll_vote` tables with FKs to event/attendee/poll_item; status flag (open/closed), title, top_n_winners, show_vote_count flag, customizable thanks/closed/no-votes messages on `poll` | High | 🟢 Completed |
+| F121 | One-Vote-Per-Attendee Constraint | Unique constraint on `poll_vote(poll_id, attendee_id)` to enforce single vote per attendee per poll | High | 🟢 Completed |
+| F122 | submit_vote RPC | SECURITY DEFINER function: validates poll is open and attendee is checked into the event, upserts vote on (poll_id, attendee_id) so attendees can change their vote until close | High | 🟢 Completed |
+| F123 | Poll Results Query | Function/view returning ranked results using competition ranking for ties (e.g., two-way tie for 2nd both show "2nd Place — Tie", next item is 4th); honors per-poll top_n_winners; returns all items if N exceeds item count; includes `is_my_vote` per item and the poll's `winner_labels` map | High | 🟢 Completed |
+| F124 | RLS & Grants | RLS policies allowing anon to read polls/items/results for events they're checked into; no direct writes — function-only path; revoke direct anon writes on poll_vote | High | 🟢 Completed |
+| F125 | Rollback Migration | Companion script to drop new tables/function and restore prior schema | Medium | 🟢 Completed |
+| F126 | TypeScript Interfaces | Add Poll, PollItem, PollVote, PollResult interfaces and update database types | High | 🟢 Completed |
+| F127 | Database Service Methods | Frontend service methods to fetch open polls for an event, cast/change a vote via RPC, fetch closed-poll results | High | 🟢 Completed |
+| F128 | Ballot UI (in popup) | Inside the popup modal: custom poll title, single-select radio list of items, `[Vote]` button. Visible only to checked-in attendees | High | 🟢 Completed |
+| F129 | Post-Vote Thank-You State (in popup) | After submission inside the popup, replace ballot with the per-poll customizable `thanks_message` and a list of items with the prior pick highlighted | High | 🟢 Completed |
+| F130 | Change-Vote Capability (in popup) | Allow attendees to re-open the ballot via a "Change your vote" link any time before the poll closes; prior selection pre-selected | Medium | 🟢 Completed |
+| F131 | Closed-Poll Results Display (in popup) | When the inbox row is tapped for a closed poll, show ranked winners (1st/2nd/3rd...) honoring `top_n_winners`, with tie handling, optional vote counts (per `show_vote_count` flag), per-rank labels from `poll_winner_label` (default `"Nth Place"` for unlabeled ranks), and a "your pick" badge next to the item the attendee voted for | High | 🟢 Completed |
 | F132 | Voting-Closed State for Non-Voters | (Subsumed by popup + inbox model.) The popup itself is the deliberate click-through from the inbox row; no separate intermediate `closed_message` state is needed. Mark this row as superseded by F139 during build. | Medium | 🚫 Superseded by F139 |
-| F133 | No-Votes-Recorded State (in popup) | If a poll closes with zero votes, show the per-poll customizable `no_votes_message` inside the popup in place of the ranked results | Medium | 🔴 Not Started |
+| F133 | No-Votes-Recorded State (in popup) | If a poll closes with zero votes, show the per-poll customizable `no_votes_message` inside the popup in place of the ranked results | Medium | 🟢 Completed |
 | F134 | Multi-Poll & History UX Prototype | Ran `:cody prototype` (see `docs/prototypes/polls-ui/`); decided on popup + inbox model. No "Polls" history button needed; closed polls live in the same inbox card and open results in the popup | High | 🟢 Completed |
-| F135 | Update latest-schema.sql | Reflect new poll/poll_item/poll_winner_label/poll_vote tables, constraints, and grants | Medium | 🔴 Not Started |
-| F136 | Poll Winner Labels | New `poll_winner_label` table (composite PK `(poll_id, rank)`, FK to poll, function-only access) so admin can set per-rank labels per poll (e.g., 4 → "Honorable Mention"); zero rows = use client defaults | Medium | 🔴 Not Started |
-| F137 | Empty-Poll Placeholder | Render a "voting items coming soon" message inside the popup when an active, open poll has zero items (rare safety path; admin normally keeps polls inactive while drafting) | Low | 🔴 Not Started |
-| F138 | Polls Inbox Card | New `PollsInbox.svelte` component on the unified main screen between the "You're checked in!" hero and the donation card. Renders one row per active poll with title, subtitle hint, and a right-side pill (red "Vote", green "Voted", amber "Results"). Tapping any row opens the popup for that poll | High | 🔴 Not Started |
-| F139 | Poll Popup Modal | New `PollPopup.svelte` modal component that hosts the ballot / voted / results / no-votes / empty-items states for one poll. Closes via top-right X, dim-overlay click, or Escape. Emits a `voted` event so the page can refresh inbox pills | High | 🔴 Not Started |
+| F135 | Update latest-schema.sql | Reflect new poll/poll_item/poll_winner_label/poll_vote tables, constraints, and grants | Medium | 🟢 Completed |
+| F136 | Poll Winner Labels | New `poll_winner_label` table (composite PK `(poll_id, rank)`, FK to poll, function-only access) so admin can set per-rank labels per poll (e.g., 4 → "Honorable Mention"); zero rows = use client defaults | Medium | 🟢 Completed |
+| F137 | Empty-Poll Placeholder | Render a "voting items coming soon" message inside the popup when an active, open poll has zero items (rare safety path; admin normally keeps polls inactive while drafting) | Low | 🟢 Completed |
+| F138 | Polls Inbox Card | New `PollsInbox.svelte` component on the unified main screen between the "You're checked in!" hero and the donation card. Renders one row per active poll with title, subtitle hint, and a right-side pill (red "Vote", green "Voted", amber "Results"). Tapping any row opens the popup for that poll | High | 🟢 Completed |
+| F139 | Poll Popup Modal | New `PollPopup.svelte` modal component that hosts the ballot / voted / results / no-votes / empty-items states for one poll. Closes via top-right X, dim-overlay click, or Escape. Emits a `voted` event so the page can refresh inbox pills | High | 🟢 Completed |
 | F140 | Auto-Popup on Load | Built and deployed; reversed live based on production testing. The auto-popup felt intrusive when checking in fresh — the inbox row with the red "Vote" pill already communicates the action clearly enough. Removed from `EventScreen.svelte` and `src/lib/utils/polls.ts` was deleted. | Medium | 🚫 Removed (post-deploy) |
 
 ## v1.5.0-per-event-interesting-fact - 🟢 Completed
