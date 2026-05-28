@@ -45,6 +45,7 @@ export interface Event {
 	url_id: string;
 	title: string;
 	welcome_message: string;
+	checkedin_message: string | null;
 	about_presentation: string | null;
 	about_workshop: string | null;
 	presenter_id: string;

@@ -213,6 +213,12 @@
 			</header>
 
 			<main class="event-main">
+				{#if isCheckedIn && event.checkedin_message?.trim()}
+					<div class="checkedin-message-box">
+						<p>{@html formatLineBreaks(event.checkedin_message)}</p>
+					</div>
+				{/if}
+
 				{#if isCheckedIn && polls.length > 0}
 					<PollsInbox {polls} onSelect={handlePollSelect} />
 				{/if}
@@ -561,6 +567,36 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+	}
+
+	/* v1.6.1 — optional per-event message shown only after check-in,
+	   between the "You're checked in!" hero and the polls inbox.
+	   Same gray-card look as donation-box, but left-aligned and no header. */
+	.checkedin-message-box {
+		background: var(--color-content-bg);
+		border-radius: 1rem;
+		padding: 1.25rem;
+		box-shadow: 0 10px 25px var(--shadow-light);
+	}
+
+	.checkedin-message-box p {
+		margin: 0;
+		font-size: 1rem;
+		line-height: 1.6;
+		color: var(--color-text-secondary);
+		text-align: left;
+	}
+
+	/* :global() so the styling reaches <a> tags injected via {@html}.
+	   Svelte's CSS scoping otherwise won't tag dynamic content. */
+	.checkedin-message-box :global(a) {
+		color: var(--color-accent-dark);
+		text-decoration: underline;
+		font-weight: 600;
+	}
+
+	.checkedin-message-box :global(a:hover) {
+		color: var(--color-accent);
 	}
 
 	.donation-message {

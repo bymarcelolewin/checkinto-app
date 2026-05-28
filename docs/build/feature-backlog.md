@@ -240,6 +240,18 @@ Lock down Data API access via a SECURITY DEFINER check-in function and restructu
 | F111 | Update database.ts and types.ts | Rewrite checkInAttendee to call RPC, delete now-unused helpers, drop community_id from Attendee type | High | 🟢 Completed |
 | F112 | Update latest-schema.sql | Reflect new attendee/community_attendee structure and tightened grants | Medium | 🟢 Completed |
 
+## v1.6.1-checkedin-message - 🔴 Not Started
+Add an optional per-event message that displays after an attendee checks in (e.g., "Get your buildathon document now!" with embedded link). New nullable `checkedin_message` column on the `event` table, rendered in a gray card between the "You're checked in!" hero and the polls inbox. Supports inline HTML (like `welcome_message`) so admins can drop in `<a href="…">` tags directly. Empty or whitespace-only values hide the card entirely.
+
+| ID  | Feature                 | Description                              | Priority | Status |
+|-----|-------------------------|------------------------------------------|----------|--------|
+| F141 | Schema Migration | Add nullable `checkedin_message text` column to `event` table. No default; existing rows stay NULL | High | 🔴 Not Started |
+| F142 | Rollback Migration | Companion script dropping the `checkedin_message` column | Medium | 🔴 Not Started |
+| F143 | TypeScript Interface Update | Add `checkedin_message: string \| null` to the `Event` interface; verify the field flows through existing event queries (which use `SELECT *`) | High | 🔴 Not Started |
+| F144 | Checked-In Message Card | New gray card markup in `EventScreen.svelte` rendered only when checked-in AND `event.checkedin_message?.trim()` is truthy. No header, left-justified text, supports inline HTML and `\n → <br>` (same `formatLineBreaks` + `@html` pattern as `welcome_message`) | High | 🔴 Not Started |
+| F145 | Wire into Unified Main Screen | Mount the checked-in message card between the "You're checked in!" hero and the polls inbox card. Whitespace-only values hide the card | High | 🔴 Not Started |
+| F146 | Update latest-schema.sql | Add the new `checkedin_message` column to the `event` table block in `database/latest-schema.sql` | Medium | 🔴 Not Started |
+
 ## v1.6.0-event-voting - 🟢 Completed
 Add a per-event voting feature so checked-in attendees can vote on admin-defined items (e.g., hackathon projects) and see ranked winners once the admin closes the poll. Backend-only management (no admin UI yet — polls/items/state managed directly in Supabase). One vote per attendee per poll; attendees may change their vote while the poll is open. Multiple polls per event are supported; the final layout for multi-poll display and the persistent "Polls" history view will be designed via `:cody prototype` before finalizing UI scope.
 
