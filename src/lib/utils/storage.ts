@@ -8,6 +8,10 @@ export interface ConfirmationState {
 	timestamp: number;
 	eventId: string;
 	attendeeEmail?: string;
+	// v1.6.0+: persisted so polls feature can identify the checked-in
+	// attendee server-side. Optional because attendees who checked in
+	// before v1.6.0 won't have it; they'll need to re-check-in to get it.
+	attendeeId?: string;
 }
 
 const STORAGE_KEY_PREFIX = 'group-checkin';
@@ -38,7 +42,11 @@ export function isStorageAvailable(): boolean {
 /**
  * Store confirmation state for an event
  */
-export function storeConfirmationState(eventId: string, attendeeEmail?: string): boolean {
+export function storeConfirmationState(
+	eventId: string,
+	attendeeEmail?: string,
+	attendeeId?: string
+): boolean {
 	if (!isStorageAvailable()) return false;
 
 	try {
@@ -46,7 +54,8 @@ export function storeConfirmationState(eventId: string, attendeeEmail?: string):
 			isConfirmed: true,
 			timestamp: Date.now(),
 			eventId,
-			attendeeEmail
+			attendeeEmail,
+			attendeeId
 		};
 
 		const key = getStorageKey(eventId);

@@ -54,11 +54,13 @@
 					console.log('New attendee successfully checked in');
 				}
 				
-				// Store email before reset for raffle winner comparison
+				// Store email + attendee_id before reset (email for raffle winner
+				// comparison; attendee_id for v1.6.0+ polls feature identity).
 				const checkedInEmail = formState.data.email;
+				const checkedInAttendeeId = result.attendee_id;
 				// Reset form and navigate to confirmation
 				formActions.reset();
-				navigationActions.completeCheckin(event, checkedInEmail);
+				navigationActions.completeCheckin(event, checkedInEmail, checkedInAttendeeId);
 			} else {
 				// Handle submission error with specific error message
 				const errorMessage = result.error || 'Failed to complete check-in. Please try again.';

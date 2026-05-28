@@ -5,7 +5,9 @@ import type {
 	AttendeeInput,
 	CheckInResponse,
 	CheckInFormData,
-	FormErrors
+	FormErrors,
+	Poll,
+	SubmitVoteResponse
 } from './types.js';
 import { VALIDATION_RULES } from './types.js';
 
@@ -177,6 +179,7 @@ export class DatabaseService {
 
 			return {
 				success: true,
+				attendee_id: data.attendee_id,
 				isExistingAttendee: !!data.already_checked_in
 			};
 		} catch (err) {
@@ -185,6 +188,64 @@ export class DatabaseService {
 				success: false,
 				error: 'An unexpected error occurred during check-in'
 			};
+		}
+	}
+
+	/**
+	 * Fetch the polls payload for an event via the get_polls_for_event
+	 * SECURITY DEFINER function. Returns an empty array on any error or when
+	 * the caller is not checked into the event (the function silently returns
+	 * { polls: [] } in that case).
+	 * See database/functions/get-polls-for-event.sql.
+	 */
+	static async getPollsForEvent(eventId: string, attendeeId: string): Promise<Poll[]> {
+		try {
+			const { data, error } = await supabase.rpc('get_polls_for_event', {
+				p_event_id: eventId,
+				p_attendee_id: attendeeId
+			});
+
+			if (error) {
+				console.error('Error calling get_polls_for_event:', error);
+				return [];
+			}
+
+			return (data?.polls ?? []) as Poll[];
+		} catch (err) {
+			console.error('Error in getPollsForEvent:', err);
+			return [];
+		}
+	}
+
+	/**
+	 * Cast or change a vote via the submit_vote SECURITY DEFINER function.
+	 * The function upserts on (poll_id, attendee_id), so calling it again with
+	 * a different item is the "change your vote" path. Returns the raw server
+	 * response so the caller can distinguish error codes
+	 * (poll_unavailable / invalid_item / not_checked_in).
+	 * See database/functions/submit-vote.sql.
+	 */
+	static async submitVote(
+		pollId: string,
+		pollItemId: string,
+		attendeeId: string
+	): Promise<SubmitVoteResponse> {
+		try {
+			const { data, error } = await supabase.rpc('submit_vote', {
+				p_poll_id: pollId,
+				p_poll_item_id: pollItemId,
+				p_attendee_id: attendeeId
+			});
+
+			if (error) {
+				console.error('Error calling submit_vote:', error);
+				return { success: false, error: 'unexpected_error' };
+			}
+
+			return data as SubmitVoteResponse;
+		} catch (err) {
+			console.error('Error in submitVote:', err);
+			return { success: false, error: 'unexpected_error' };
 		}
 	}
 

@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { Button } from '$lib/components';
+	import PollsInbox from '$lib/components/PollsInbox.svelte';
+	import PollPopup from '$lib/components/PollPopup.svelte';
 	import { navigationActions } from '$lib/stores';
 	import { fetchRaffleWinners, getOrdinal, isWinner } from '$lib/utils/raffle';
 	import { getConfirmationState, hasConfirmationState, clearConfirmationState } from '$lib/utils/storage';
+	import { pickAutoPopupPoll, markPollSeen, clearSeenPollIds } from '$lib/utils/polls';
 	import { getImagePath, IMAGE_CATEGORIES } from '$lib/utils/imagePaths';
-	import type { Event, RaffleWinner } from '$lib/types';
+	import { DatabaseService } from '$lib/database';
+	import type { Event, Poll, RaffleWinner } from '$lib/types';
 
 	interface Props {
 		event: Event | null;
@@ -23,6 +27,12 @@
 	let currentUserEmail = $state<string>('');
 	let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
+	// Polls (v1.6.0) state
+	let currentAttendeeId = $state<string>('');
+	let polls = $state<Poll[]>([]);
+	let openPollId = $state<string | null>(null);
+	let openPoll = $derived(polls.find((p) => p.id === openPollId) ?? null);
+
 	const handleCheckIn = () => {
 		navigationActions.startCheckin();
 	};
@@ -38,6 +48,11 @@
 				clearInterval(pollingInterval);
 				pollingInterval = null;
 			}
+			// Reset polls state and auto-popup history for this event
+			currentAttendeeId = '';
+			polls = [];
+			openPollId = null;
+			if (event?.id) clearSeenPollIds(event.id);
 		}
 	};
 
@@ -47,20 +62,69 @@
 			// Check if user is checked in
 			isCheckedIn = hasConfirmationState(event.url_id);
 
-			// Get the email from the stored confirmation state
+			// Get the email + attendee_id from the stored confirmation state
 			if (isCheckedIn) {
 				const confirmationState = getConfirmationState(event.url_id);
 				if (confirmationState?.attendeeEmail) {
 					currentUserEmail = confirmationState.attendeeEmail;
+				}
+				if (confirmationState?.attendeeId) {
+					currentAttendeeId = confirmationState.attendeeId;
 				}
 
 				// Start polling for raffle winners only if checked in
 				if (event?.id) {
 					startPollingForWinners();
 				}
+
+				// Load polls (v1.6.0). Requires both event.id and a stored
+				// attendee_id. Pre-v1.6.0 check-ins won't have an attendee_id
+				// in localStorage; those attendees see no polls until they
+				// re-check-in. Acceptable graceful degradation.
+				if (event?.id && currentAttendeeId) {
+					loadPollsAndMaybeAutoPopup();
+				}
 			}
 		}
 	});
+
+	const loadPollsAndMaybeAutoPopup = async () => {
+		if (!event?.id || !currentAttendeeId) return;
+		polls = await DatabaseService.getPollsForEvent(event.id, currentAttendeeId);
+		const target = pickAutoPopupPoll(polls, event.id);
+		if (target) {
+			markPollSeen(event.id, target.id);
+			openPollId = target.id;
+		}
+	};
+
+	const refreshPolls = async () => {
+		if (!event?.id || !currentAttendeeId) return;
+		polls = await DatabaseService.getPollsForEvent(event.id, currentAttendeeId);
+	};
+
+	const handlePollSelect = (pollId: string) => {
+		openPollId = pollId;
+	};
+
+	const handlePopupClose = () => {
+		openPollId = null;
+	};
+
+	const handlePopupVote = async (
+		pollItemId: string
+	): Promise<{ success: boolean; error?: string }> => {
+		if (!openPollId || !currentAttendeeId) {
+			return { success: false, error: 'unexpected_error' };
+		}
+		const result = await DatabaseService.submitVote(openPollId, pollItemId, currentAttendeeId);
+		if (result.success) {
+			// Refresh polls so the inbox pill flips to "Voted" and the popup
+			// re-renders with my_vote_item_id set.
+			await refreshPolls();
+		}
+		return result;
+	};
 
 	onDestroy(() => {
 		// Clean up polling interval
@@ -161,6 +225,10 @@
 			</header>
 
 			<main class="event-main">
+				{#if isCheckedIn && polls.length > 0}
+					<PollsInbox {polls} onSelect={handlePollSelect} />
+				{/if}
+
 				{#if !isCheckedIn}
 					<div class="welcome-box">
 						{#if event.welcome_message}
@@ -385,6 +453,14 @@
 		</div>
 	{/if}
 </div>
+
+{#if openPoll}
+	<PollPopup
+		poll={openPoll}
+		onClose={handlePopupClose}
+		onVote={handlePopupVote}
+	/>
+{/if}
 
 <style>
 	.event-screen {

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polls UI Prototype — CheckInto v1.6.0</title>
+  <link rel="stylesheet" href="styles.css?v=4" />
+</head>
+<body>
+
+  <!-- DEV CONTROL PANEL — not part of the real app -->
+  <aside class="dev-panel">
+    <div class="dev-panel-inner">
+      <h2>Prototype controls</h2>
+      <p class="dev-hint">Model: popup for active engagement + inbox card on main screen for persistent access.</p>
+
+      <div id="debug-status" class="debug-status">state: (initializing…)</div>
+
+      <fieldset>
+        <legend>Display toggles</legend>
+        <label><input type="checkbox" id="toggle-vote-counts" /> Show vote counts on closed-poll results</label>
+        <label><input type="checkbox" id="toggle-donation" checked /> Show donation box</label>
+        <label><input type="checkbox" id="toggle-event-details" checked /> Show event details</label>
+        <label><input type="checkbox" id="toggle-auto-popup" checked /> Auto-popup first un-voted open poll on load</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Manual popup controls</legend>
+        <button class="dev-btn" id="btn-open-p1">Open popup → poll 1 (favorite project)</button>
+        <button class="dev-btn" id="btn-open-p2">Open popup → poll 2 (best demo)</button>
+        <button class="dev-btn" id="btn-open-p3">Open popup → poll 3 (MVP, closed)</button>
+        <button class="dev-btn" id="btn-close-popup">Close popup</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Simulate admin actions</legend>
+        <button class="dev-btn" id="btn-close-poll-1">Close poll 1 (favorite project)</button>
+        <button class="dev-btn" id="btn-reopen-poll-3">Reopen poll 3 (MVP)</button>
+        <button class="dev-btn" id="btn-reset-votes">Reset my votes</button>
+        <button class="dev-btn" id="btn-reload-popup">Trigger auto-popup again</button>
+      </fieldset>
+
+      <p class="dev-hint" style="margin-top:16px;">Tap any row in the inbox card to reopen its popup. Open polls open the ballot; closed polls open the results.</p>
+    </div>
+  </aside>
+
+  <!-- PHONE PREVIEW -->
+  <main class="phone-stage">
+    <div class="phone-frame">
+      <section class="app-body" id="app-body">
+        <!-- Branded banner -->
+        <div class="banner-card">
+          <div class="banner-art">
+            <span class="banner-icon">👨‍💻</span>
+            <span class="banner-title">iBuildWith.ai<br/><span class="banner-title-big">Meetup</span></span>
+          </div>
+        </div>
+
+        <!-- Checked-in hero -->
+        <div class="checked-hero">
+          <span class="check-circle">✓</span>
+          <span class="check-text">You're checked in!</span>
+        </div>
+
+        <!-- POLLS INBOX CARD — stacked list of all polls (only renders if there are any) -->
+        <div class="card polls-inbox" id="polls-inbox">
+          <h3>Polls</h3>
+          <div id="inbox-list"></div>
+        </div>
+
+        <!-- Donation -->
+        <div class="card donation-card" id="donation-card">
+          <h3>Enjoying this event?</h3>
+          <p class="muted">Want to help cover expenses?</p>
+          <button class="btn btn-donate">Donate</button>
+        </div>
+
+        <!-- Event details -->
+        <div class="card event-card" id="event-details">
+          <div class="event-row">
+            <span class="event-icon">📅</span>
+            <div>
+              <strong>Event</strong>
+              <p class="link">I Build with AI Meetup</p>
+              <p class="muted">I Build with AI Buildathon: From Idea to Demo</p>
+            </div>
+          </div>
+          <div class="event-row">
+            <span class="event-icon">🧑‍🤝‍🧑</span>
+            <div>
+              <strong>Hosted By</strong>
+              <p class="link">Jonathan Lewin</p>
+              <strong>Presented By</strong>
+              <p class="link">Marcelo Lewin</p>
+            </div>
+          </div>
+          <div class="event-row">
+            <span class="event-icon">🏢</span>
+            <div>
+              <strong>Venue</strong>
+              <p><strong>Fullerton Community Center</strong></p>
+              <p class="muted">We meet inside the Boardroom</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- POPUP / MODAL -->
+      <div class="popup-overlay" id="popup-overlay" hidden>
+        <div class="popup-card" id="popup-card">
+          <button class="popup-close" id="popup-close" aria-label="Close">×</button>
+          <div id="popup-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="stage-caption">Mobile preview — 375 × 760 phone frame. Scroll within the frame to see all cards.</p>
+  </main>
+
+  <script src="script.js?v=3"></script>
+</body>
+</html>

@@ -101,6 +101,57 @@ export interface EventAttendee {
 	created_at: string;
 }
 
+// Poll Types (v1.6.0-event-voting)
+// Direct DB rows are never read by the frontend — all access goes through the
+// get_polls_for_event() RPC, which returns the hydrated Poll shape below.
+// PollWinnerLabel is included for completeness / admin tooling.
+
+export interface PollItem {
+	id: string;
+	name: string;
+	display_order: number;
+}
+
+export interface PollResult {
+	poll_item_id: string;
+	name: string;
+	vote_count: number;
+	rank: number;
+	is_my_vote: boolean;
+}
+
+export interface PollWinnerLabel {
+	poll_id: string;
+	rank: number;
+	label: string;
+}
+
+export interface Poll {
+	id: string;
+	title: string;
+	status: 'open' | 'closed';
+	top_n_winners: number;
+	show_vote_count: boolean;
+	thanks_message: string;
+	closed_message: string;
+	no_votes_message: string;
+	display_order: number;
+	items: PollItem[];
+	my_vote_item_id: string | null;
+	// rank (as string key) → custom label, e.g. { "1": "Grand Prize", "4": "Honorable Mention" }
+	winner_labels: Record<string, string>;
+	// null when status === 'open'; populated when status === 'closed'
+	results: PollResult[] | null;
+}
+
+export interface SubmitVoteResponse {
+	success: boolean;
+	poll_item_id?: string;
+	// Server-side error codes: 'poll_unavailable' | 'invalid_item' | 'not_checked_in'
+	// plus the client-side fallback 'unexpected_error'.
+	error?: string;
+}
+
 // Form Types
 export interface CheckInFormData {
 	first_name: string;
@@ -113,6 +164,7 @@ export interface CheckInFormData {
 export interface CheckInResponse {
 	success: boolean;
 	attendee?: Attendee;
+	attendee_id?: string;
 	error?: string;
 	isExistingAttendee?: boolean;
 }
@@ -256,6 +308,18 @@ export function isAttendee(obj: unknown): obj is Attendee {
 		typeof (obj as Attendee).first_name === 'string' &&
 		typeof (obj as Attendee).last_name === 'string' &&
 		typeof (obj as Attendee).email === 'string'
+	);
+}
+
+export function isPoll(obj: unknown): obj is Poll {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		typeof (obj as Poll).id === 'string' &&
+		typeof (obj as Poll).title === 'string' &&
+		((obj as Poll).status === 'open' || (obj as Poll).status === 'closed') &&
+		typeof (obj as Poll).top_n_winners === 'number' &&
+		Array.isArray((obj as Poll).items)
 	);
 }
 

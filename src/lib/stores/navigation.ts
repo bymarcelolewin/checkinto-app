@@ -63,11 +63,11 @@ export const navigationActions = {
 	},
 
 	// Complete check-in and return to event screen with confirmed state
-	completeCheckin: (event?: Event | null, attendeeEmail?: string) => {
+	completeCheckin: (event?: Event | null, attendeeEmail?: string, attendeeId?: string) => {
 		navigationStore.update(state => {
 			// Store confirmation state if persistence is allowed
 			if (event && canPersistConfirmationState(event)) {
-				storeConfirmationState(state.eventId, attendeeEmail);
+				storeConfirmationState(state.eventId, attendeeEmail, attendeeId);
 			}
 
 			return {
